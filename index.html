@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>🌊 Cabo Verde 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -22,8 +25,8 @@
   .stat{background:rgba(255,255,255,0.1);border-radius:12px;padding:7px 10px;flex:1;text-align:center;backdrop-filter:blur(8px);}
   .stat-n{color:#fff;font-size:17px;font-weight:700;}
   .stat-l{color:rgba(255,255,255,0.45);font-size:9px;text-transform:uppercase;letter-spacing:.06em;}
-  .filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
-  .filter-btn{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);border:none;border-radius:20px;padding:7px 15px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:2px;}
+  .filter-btn{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);border:none;border-radius:20px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:38px;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
   .filter-btn.active{background:#fff;color:#0B2545;}
 
   .content{padding:14px 12px 90px;}
@@ -267,11 +270,17 @@ function render(){
   islands.forEach(i => fhtml += `<button class="filter-btn ${state.filter===i?'active':''}" data-filter="${escapeHtml(i)}">${escapeHtml(i)}</button>`);
   document.getElementById('filters').innerHTML = fhtml;
 
+  // Triple capa de seguridad: onclick directo en cada botón después de renderizar
+  document.querySelectorAll('#filters .filter-btn').forEach(btn => {
+    btn.onclick = function(){ setFilter(btn.dataset.filter); };
+    btn.ontouchend = function(e){ e.preventDefault(); setFilter(btn.dataset.filter); };
+  });
+
   renderPending();
   renderDays();
 }
 
-// EVENT DELEGATION for filters (fixes any onclick/escaping issues)
+// EVENT DELEGATION (segunda capa de seguridad)
 document.getElementById('filters').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (btn && btn.dataset.filter !== undefined) setFilter(btn.dataset.filter);
@@ -393,9 +402,11 @@ function toggleOpen(id){
   if (id === '__pending') renderPending(); else renderDays();
 }
 function setFilter(f){
+  if (f === undefined || f === null) return;
   state.filter = f;
-  saveState();
-  render();
+  saveState(); render();
+  // Confirmación visual rápida (en caso de bug visual)
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 function togglePending(id){
   const p = state.pending.find(x=>x.id===id);

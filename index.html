@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🌊 Cabo Verde 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#FFF8F0 0%,#EDF4FF 100%);min-height:100vh;color:#111;}
+  ::-webkit-scrollbar{display:none;}
+  a{color:#4A90D9;text-decoration:none;}
+  button{font-family:inherit;}
+
+  .hero{background:linear-gradient(145deg,#0B2545 0%,#134074 55%,#1B6CA8 100%);padding:44px 18px 22px;position:relative;overflow:hidden;}
+  .hero-circle1{position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(27,108,168,0.3);}
+  .hero-circle2{position:absolute;bottom:-30px;left:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,140,60,0.15);}
+  .hero-label{color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px;cursor:pointer;}
+  .hero-title{color:#fff;font-size:32px;font-family:'Playfair Display',serif;line-height:1.1;margin-bottom:4px;cursor:pointer;}
+  .hero-sub{color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:18px;cursor:pointer;}
+  .stats{display:flex;gap:8px;margin-bottom:14px;}
+  .stat{background:rgba(255,255,255,0.1);border-radius:12px;padding:7px 10px;flex:1;text-align:center;backdrop-filter:blur(8px);}
+  .stat-n{color:#fff;font-size:17px;font-weight:700;}
+  .stat-l{color:rgba(255,255,255,0.45);font-size:9px;text-transform:uppercase;letter-spacing:.06em;}
+  .filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+  .filter-btn{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);border:none;border-radius:20px;padding:7px 15px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  .filter-btn.active{background:#fff;color:#0B2545;}
+
+  .content{padding:14px 12px 90px;}
+  .section-label{font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.1em;text-transform:uppercase;margin:0 4px 10px;}
+
+  .card{background:#fff;border-radius:18px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.05);transition:box-shadow .2s;}
+  .card.open{box-shadow:0 6px 28px rgba(0,0,0,0.09);}
+  .card-header{display:flex;align-items:center;gap:11px;padding:13px 15px;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+  .card-emoji{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .card-meta{flex:1;min-width:0;}
+  .card-day{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+  .card-title{font-size:15px;font-weight:700;color:#111;font-family:'Playfair Display',serif;line-height:1.2;margin-top:1px;}
+  .card-island{font-size:10px;color:#94A3B8;}
+  .card-arrow{font-size:10px;color:#CBD5E1;transition:transform .2s;flex-shrink:0;}
+  .card-body{padding:0 15px 14px;display:none;}
+  .card.open .card-body{display:block;}
+  .card.open .card-arrow{transform:rotate(90deg);}
+  .pending-badge{font-size:9px;background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:8px;font-weight:700;}
+  .day-actions{display:flex;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid #F1F5F9;}
+  .day-action-btn{flex:1;background:#F8FAFC;border:none;border-radius:9px;padding:7px;font-size:11px;color:#475569;cursor:pointer;font-weight:600;}
+  .day-action-btn:active{background:#E2E8F0;}
+  .day-action-btn.danger{color:#DC2626;}
+
+  .item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #F1F5F9;}
+  .item:last-of-type{border-bottom:none;}
+  .item-icon{font-size:16px;min-width:22px;margin-top:1px;}
+  .item-content{flex:1;min-width:0;}
+  .item-text{font-size:12px;color:#1a1a1a;line-height:1.45;margin-bottom:4px;word-break:break-word;}
+  .item-tags{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+  .tag{font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:20px;text-transform:uppercase;display:inline-block;}
+  .tag-link-small{font-size:9px;color:#4A90D9;}
+  .item-actions{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
+  .icon-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:3px;line-height:1;color:#CBD5E1;}
+  .icon-btn:active{color:#64748B;}
+
+  .note-toggle{font-size:9px;color:#64748B;background:#F1F5F9;padding:2px 8px;border-radius:20px;cursor:pointer;border:none;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+  .note-toggle:active{background:#E2E8F0;}
+  .item-note{display:none;font-size:11px;color:#475569;background:#FEFCE8;border-left:3px solid #FACC15;border-radius:0 8px 8px 0;padding:8px 11px;margin-top:7px;line-height:1.45;white-space:pre-wrap;}
+  .item-note.open{display:block;animation:noteSlide .18s ease;}
+  @keyframes noteSlide{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+
+  .add-item-btn{margin-top:10px;background:#F0F9FF;border:1.5px dashed #93C5FD;border-radius:10px;padding:9px 14px;font-size:12px;color:#1D4ED8;cursor:pointer;width:100%;font-weight:600;}
+  .add-item-btn:active{background:#DBEAFE;}
+
+  .hotel-footer{margin-top:10px;display:flex;align-items:center;background:#F8FAFC;border-radius:10px;padding:8px 11px;gap:6px;font-size:11px;color:#64748B;cursor:pointer;justify-content:space-between;}
+  .hotel-footer:active{background:#E2E8F0;}
+  .hotel-left{display:flex;align-items:center;gap:6px;min-width:0;flex:1;}
+  .hotel-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .pending-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #F1F5F9;}
+  .pending-item:last-of-type{border-bottom:none;}
+  .checkbox{width:20px;height:20px;border-radius:6px;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;cursor:pointer;}
+  .checkbox.done{background:#10B981;border-color:#10B981;}
+  .checkbox.done::after{content:'✓';color:#fff;font-size:11px;}
+  .pending-text{font-size:12px;color:#111;line-height:1.4;margin-bottom:2px;}
+  .pending-text.done{text-decoration:line-through;color:#9CA3AF;}
+  .pending-detail{font-size:10px;color:#94A3B8;}
+  .urgency-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+  .legend{font-size:9px;color:#94A3B8;margin-top:8px;}
+
+  .fab{position:fixed;bottom:20px;right:18px;background:linear-gradient(135deg,#1B6CA8,#0B2545);color:#fff;border:none;border-radius:50%;width:56px;height:56px;font-size:24px;cursor:pointer;box-shadow:0 6px 20px rgba(11,37,69,0.4);z-index:50;}
+  .fab:active{transform:scale(0.95);}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:flex-end;justify-content:center;}
+  .modal-backdrop.show{display:flex;animation:fadeIn .2s;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{background:#fff;width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:20px 18px 28px;max-height:90vh;overflow-y:auto;animation:slideUp .25s;}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;}
+  .modal-title{font-size:18px;font-weight:700;font-family:'Playfair Display',serif;margin-bottom:4px;}
+  .modal-subtitle{font-size:11px;color:#94A3B8;margin-bottom:18px;}
+  .field{margin-bottom:14px;}
+  .field-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block;}
+  .field-input,.field-textarea,.field-select{width:100%;border:1.5px solid #E2E8F0;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fff;color:#111;}
+  .field-input:focus,.field-textarea:focus,.field-select:focus{outline:none;border-color:#4A90D9;}
+  .field-textarea{resize:vertical;min-height:60px;}
+  .field-textarea.large{min-height:90px;}
+
+  .icon-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;max-height:140px;overflow-y:auto;padding:6px;background:#F8FAFC;border-radius:10px;}
+  .icon-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:7px;cursor:pointer;background:#fff;border:1.5px solid transparent;}
+  .icon-cell.selected{border-color:#4A90D9;background:#EFF6FF;}
+
+  .tag-grid{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag-pick{background:#F1F5F9;color:#475569;border:1.5px solid transparent;border-radius:20px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.04em;}
+  .tag-pick.selected{border-color:#0B2545;background:#0B2545;color:#fff;}
+
+  .color-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .color-cell{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;}
+  .color-cell.selected{border-color:#0B2545;}
+
+  .urgency-grid{display:flex;gap:6px;}
+  .urgency-pick{flex:1;background:#F1F5F9;border:1.5px solid transparent;border-radius:10px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;color:#475569;}
+  .urgency-pick.selected{border-width:2px;}
+  .urgency-pick[data-u="alta"].selected{background:#FEE2E2;color:#B91C1C;border-color:#EF4444;}
+  .urgency-pick[data-u="media"].selected{background:#FEF3C7;color:#92400E;border-color:#F59E0B;}
+  .urgency-pick[data-u="baja"].selected{background:#D1FAE5;color:#065F46;border-color:#10B981;}
+
+  .modal-actions{display:flex;gap:8px;margin-top:18px;}
+  .btn-primary{flex:1;background:#0B2545;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn-primary:active{background:#1B6CA8;}
+  .btn-secondary{flex:1;background:#F1F5F9;color:#475569;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn-danger-full{width:100%;background:#FEE2E2;color:#B91C1C;border:none;border-radius:12px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;}
+
+  .tag-Vuelo{background:#EFF6FF;color:#1D4ED8;}
+  .tag-Transporte{background:#F0F9FF;color:#0369A1;}
+  .tag-Visita{background:#F0FDF4;color:#15803D;}
+  .tag-Playa{background:#FFF7ED;color:#C2410C;}
+  .tag-Paseo{background:#FDF4FF;color:#7E22CE;}
+  .tag-Comer{background:#FFF1F2;color:#BE123C;}
+  .tag-Noche{background:#EEF2FF;color:#4338CA;}
+  .tag-Pendiente{background:#FFFBEB;color:#B45309;}
+  .tag-Info{background:#F1F5F9;color:#475569;}
+  .tag-Ruta{background:#F0FDF4;color:#166534;}
+  .tag-Senderismo{background:#ECFDF5;color:#065F46;}
+  .tag-Paisaje{background:#F0FDFA;color:#0F766E;}
+  .tag-Actividad{background:#FAF5FF;color:#7C3AED;}
+  .tag-Relax{background:#FFF7ED;color:#9A3412;}
+  .tag-Otro{background:#F3F4F6;color:#374151;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-circle1"></div><div class="hero-circle2"></div>
+  <p class="hero-label" id="trip-label" onclick="editTrip()"></p>
+  <h1 class="hero-title" id="trip-title" onclick="editTrip()"></h1>
+  <p class="hero-sub" id="trip-sub" onclick="editTrip()"></p>
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="stat-days">0</div><div class="stat-l">días</div></div>
+    <div class="stat"><div class="stat-n" id="stat-islands">0</div><div class="stat-l">islas</div></div>
+    <div class="stat"><div class="stat-n" id="stat-items">0</div><div class="stat-l">planes</div></div>
+    <div class="stat"><div class="stat-n" id="stat-pending">0</div><div class="stat-l">pend.</div></div>
+  </div>
+  <div class="filters" id="filters"></div>
+</div>
+
+<div class="content">
+  <div id="pending-section"></div>
+  <p class="section-label">Itinerario · toca cualquier elemento para editarlo</p>
+  <div id="days-container"></div>
+  <button class="add-item-btn" style="margin-top:14px;" onclick="newDay()">＋ Añadir día</button>
+</div>
+
+<button class="fab" onclick="showMenu()">＋</button>
+
+<div class="modal-backdrop" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<script>
+const TAGS = ['Vuelo','Transporte','Visita','Playa','Paseo','Comer','Noche','Pendiente','Info','Ruta','Senderismo','Paisaje','Actividad','Relax','Otro'];
+const COLORS = ['#E8705A','#8B5CF6','#10B981','#F59E0B','#4A90D9','#06B6D4','#84CC16','#3B82F6','#22C55E','#16A34A','#0EA5E9','#F97316','#6B7280','#EC4899','#14B8A6'];
+const ICONS = ['✈️','🛬','🚕','🚗','🚂','🚌','⛴️','🏛️','⛪','🔭','🛍️','🏖️','🌅','🍽️','🎵','🍴','🍕','🍝','🍷','🥾','🥬','⛰️','🌋','🌿','🥭','🌊','🏔️','🏘️','🏰','🌆','🌙','🐢','📸','🛒','🎟️','⚠️','📝','🌴','🧗','🚶','😌','🕐','🏠','🏨','🌐','🎨','⛵','🌺','🦜','📍'];
+
+const DEFAULT_TRIP = {label:'Verano 2026',title:'🌊 Cabo Verde',sub:'📅 12 – 24 de Agosto · 13 días'};
+
+const DEFAULT_PENDING = [
+  {id:"p1",done:false,text:"Comprar ferry São Vicente → Santo Antão",detail:"30€ ida y vuelta",url:"https://www.cvinterilhas.cv/buy",urgency:"alta"},
+  {id:"p2",done:false,text:"Reservar coche de alquiler",detail:"¿Santiago y/o Santo Antão?",url:"https://simplycarpraia.com",urgency:"alta"},
+  {id:"p3",done:false,text:"Prerregistro y tasa entrada Cabo Verde",detail:"www.ease.gov.cv",url:"https://www.ease.gov.cv",urgency:"alta"},
+  {id:"p4",done:false,text:"Elegir ruta Parque Natural Malagueta",detail:"Día 3 · 14 agosto",url:"https://www.komoot.com/es-es/guide/3260826",urgency:"media"},
+  {id:"p5",done:false,text:"Elegir ruta Picos de Santiago",detail:"Día 4 · 15 agosto",url:"",urgency:"media"},
+  {id:"p6",done:false,text:"Comprar ferry vuelta Santo Antão → Mindelo",detail:"Día 11 · 22 agosto",url:"",urgency:"alta"},
+  {id:"p7",done:false,text:"Decidir alojamiento Santo Antão (Opción A o B)",detail:"Ver Día 7",url:"",urgency:"alta"},
+];
+
+const DEFAULT_DAYS = [
+  {id:"d1",date:"Mié 12 Ago",place:"Praia",island:"Santiago",color:"#E8705A",emoji:"✈️",hotel:"🏠 Casa Sodadi",hotelUrl:"https://www.booking.com/Share-tiZ5oX",
+   items:[{icon:"✈️",text:"Salida vuelo desde Madrid · 07:00h",tag:"Vuelo",url:"",note:""},{icon:"🛬",text:"Llegada a Praia · 11:20h",tag:"Vuelo",url:"",note:""},{icon:"🚕",text:"Taxi aeropuerto → Casa Sodadi",tag:"Transporte",url:"https://www.booking.com/Share-tiZ5oX",note:""},{icon:"🏛️",text:"Casco antiguo (Plateau) · Palacio Presidencial · Cuartel Jaime Mota",tag:"Visita",url:"",note:""},{icon:"⛪",text:"Iglesia Nossa Senhora da Graça · Estatua Diogo Gomes",tag:"Visita",url:"",note:""},{icon:"🔭",text:"Miradouro do Cruzeiro · Museo Amilcar Cabral",tag:"Visita",url:"",note:""},{icon:"🛍️",text:"Av. Comercial 5 do Julho · Plaza Albuquerque · Mercado Municipal",tag:"Visita",url:"",note:""},{icon:"🏖️",text:"Tarde playa: Quebra Canela o Gamboa",tag:"Playa",url:"",note:""},{icon:"🌅",text:"Paseo al atardecer hasta el Faro Doña María Pía",tag:"Paseo",url:"",note:""},{icon:"🍽️",text:"Cena: Quintal da Música · O Poeta · Kebra Cabana",tag:"Comer",url:"",note:"Quintal da Música tiene morna en vivo. O Poeta y Kebra Cabana destacan por el marisco."},{icon:"🎵",text:"Concierto de morna o funaná en bares de Praia",tag:"Noche",url:"",note:""}]},
+  {id:"d2",date:"Jue 13 Ago",place:"Cidade Velha + Tarrafal",island:"Santiago",color:"#8B5CF6",emoji:"🏰",hotel:"🏠 Bangaló Buzio Relax",hotelUrl:"https://www.booking.com/Share-16J2Lde",
+   items:[{icon:"🚗",text:"Salida desde Praia hacia Cidade Velha",tag:"Transporte",url:"",note:""},{icon:"🏛️",text:"Cidade Velha: Pelourinho · Rua da Banana · Convento San Francisco · Catedral",tag:"Visita",url:"",note:"Imprescindible histórico de Cabo Verde. Patrimonio de la UNESCO."},{icon:"🍴",text:"Posible parada para comer en Assomada",tag:"Comer",url:"https://www.barcelo.com/guia-turismo/es/cabo-verde/praia/que-ver/assomada/",note:"Solo si vamos bien de tiempo."},{icon:"🏖️",text:"Tarde relax: Playa de Tarrafal",tag:"Playa",url:"",note:""},{icon:"🌊",text:"Faro Ponta Pedra + piscinas naturales (Monte Graciosa)",tag:"Paseo",url:"",note:""}]},
+  {id:"d3",date:"Vie 14 Ago",place:"Parque Natural Malagueta",island:"Santiago",color:"#10B981",emoji:"🥾",hotel:"🏠 Hotel São Jorge Village",hotelUrl:"https://www.booking.com/Share-HSlKCLG",
+   items:[{icon:"⚠️",text:"PENDIENTE: Elegir ruta de senderismo",tag:"Pendiente",url:"https://www.komoot.com/es-es/guide/3260826",note:""},{icon:"🎟️",text:"Centro de Interpretación: tasa ~2€ por persona",tag:"Info",url:"",note:""},{icon:"🌴",text:"Vuelta por la costa este: Calheta de São Miguel · Pedra Badejo",tag:"Paseo",url:"",note:""},{icon:"📸",text:"Vale das Mil Palmeiras Santa Cruz",tag:"Visita",url:"",note:"Lugar perfecto para fotos."},{icon:"🛒",text:"Mercado al aire libre de Santa Cruz",tag:"Visita",url:"",note:""}]},
+  {id:"d4",date:"Sáb 15 Ago",place:"Picos de Santiago",island:"Santiago",color:"#F59E0B",emoji:"⛰️",hotel:"🏠 Hotel São Jorge Village",hotelUrl:"https://www.booking.com/Share-HSlKCLG",
+   items:[{icon:"⚠️",text:"PENDIENTE: Elegir ruta por los Picos",tag:"Pendiente",url:"",note:""},{icon:"🥾",text:"Excursión por los Picos de Santiago",tag:"Senderismo",url:"",note:""}]},
+  {id:"d5",date:"Dom 16 Ago",place:"Praia → São Vicente",island:"Santiago, São Vicente",color:"#4A90D9",emoji:"🛩️",hotel:"🏠 Guest House Lina Elisa",hotelUrl:"https://www.booking.com/Share-Y16Lqog",
+   items:[{icon:"🏖️",text:"Mañana de playa: São Tomé o São Francisco",tag:"Playa",url:"",note:"Cerca del aeropuerto de Praia."},{icon:"✈️",text:"Vuelo a São Vicente · 17:20h → Llegada 18:15h",tag:"Vuelo",url:"",note:""},{icon:"🌆",text:"Tarde tranquila en Mindelo",tag:"Relax",url:"https://missairesnuevos.com/que-ver-en-mindelo-cabo-verde/",note:""}]},
+  {id:"d6",date:"Lun 17 Ago",place:"Mindelo",island:"São Vicente",color:"#06B6D4",emoji:"🌊",hotel:"🏠 Guest House Lina Elisa",hotelUrl:"https://www.booking.com/Share-fuC3n5h",
+   items:[{icon:"🏖️",text:"Mañana de playa en Laginha",tag:"Playa",url:"",note:""},{icon:"🚶",text:"Paseo: Av. Marginal · Mercado Municipal · Torre de Belém · Plaza Estrella",tag:"Visita",url:"",note:""},{icon:"🍽️",text:"Cena en Grills con música tradicional",tag:"Comer",url:"",note:""}]},
+  {id:"d7",date:"Mar 18 Ago",place:"Mindelo → Santo Antão",island:"São Vicente, Santo Antão",color:"#84CC16",emoji:"⛴️",hotel:"🏠 Ver opciones A/B",hotelUrl:"https://www.booking.com/Share-rVelGq",
+   items:[{icon:"⚠️",text:"PENDIENTE: Decidir Opción A o B de alojamiento",tag:"Pendiente",url:"",note:"Opción A: 18-19 ago Casa Santa Bárbara Deluxe + 19-22 ago Casa Cavoquinho.\nOpción B: 18-21 ago Pousada Green Place + 21-22 ago Casa Cavoquinho."},{icon:"⛴️",text:"Ferry Mindelo → Porto Novo (Nôs Ferry oficial)",tag:"Transporte",url:"",note:""},{icon:"🏔️",text:"Carretera de la Corda: aldeas y montañas espectaculares",tag:"Ruta",url:"",note:""},{icon:"🏘️",text:"Visita y paseo por Ribeira Grande",tag:"Visita",url:"",note:"Capital de la isla. Mucha conexión en aluguer con Porto Novo y Paul."},{icon:"🍴",text:"Comer en Ribeira Grande",tag:"Comer",url:"",note:""}]},
+  {id:"d8",date:"Mié 19 Ago",place:"Costa Norte Santo Antão",island:"Santo Antão",color:"#3B82F6",emoji:"🧗",hotel:"🏠 Pousada Green Place",hotelUrl:"https://www.booking.com/Share-x0VGinW",
+   items:[{icon:"🥾",text:"Ruta Ponta do Sol → Cruzinha · 14km · ~6h · medio",tag:"Senderismo",url:"https://loc.wiki/t/16161354?wa=sc",note:"Una de las rutas costeras más famosas. Pasa por aldeas tradicionales con vistas espectaculares."},{icon:"🏘️",text:"Paso por Fontainhas (antiguo pueblo pirata) y Cruzinha",tag:"Visita",url:"",note:""},{icon:"🌊",text:"Vistas a los acantilados del norte",tag:"Paisaje",url:"",note:""}]},
+  {id:"d9",date:"Jue 20 Ago",place:"Valle de Paul",island:"Santo Antão",color:"#22C55E",emoji:"🌋",hotel:"🏠 Alojamiento Vale do Paul",hotelUrl:"https://www.booking.com/Share-y9vqehe",
+   items:[{icon:"🥾",text:"Ruta Cova → Paul → Vila das Pombas · 8km · 3-4h",tag:"Senderismo",url:"",note:"Inicia en cráter volcánico inactivo y termina en pueblo pesquero. Es bajada, dificultad moderada."},{icon:"🌋",text:"Cráter volcánico inactivo · final en pueblo pesquero",tag:"Paisaje",url:"",note:""}]},
+  {id:"d10",date:"Vie 21 Ago",place:"Valle de Paul",island:"Santo Antão",color:"#16A34A",emoji:"🌿",hotel:"🏠 Alojamiento Vale do Paul",hotelUrl:"https://www.booking.com/Share-y9vqehe",
+   items:[{icon:"🥾",text:"Ruta circular Valle de Paul · 3-5h · fácil-moderado",tag:"Senderismo",url:"https://missairesnuevos.com/que-ver-en-santo-antao-cabo-verde/",note:"Recorrido perfecto para descubrir las zonas agrícolas más fértiles de la isla."},{icon:"🌿",text:"Cultivos de caña de azúcar",tag:"Paisaje",url:"",note:""},{icon:"🥭",text:"Lombo Comprido: cultivos de mango y papaya",tag:"Visita",url:"",note:""}]},
+  {id:"d11",date:"Sáb 22 Ago",place:"Regreso a Mindelo",island:"Santo Antão, São Vicente",color:"#0EA5E9",emoji:"🐢",hotel:"🏠 Aquiles Eco Hotel · São Pedro",hotelUrl:"https://www.booking.com/Share-MY53p0",
+   items:[{icon:"⚠️",text:"PENDIENTE: Comprar ferry vuelta",tag:"Pendiente",url:"",note:""},{icon:"⛴️",text:"Ferry Porto Novo → Mindelo",tag:"Transporte",url:"",note:""},{icon:"🐢",text:"Snorkel con tortugas en São Pedro",tag:"Actividad",url:"",note:""},{icon:"🌅",text:"Caminata atardecer al Faro Doña Amélia · 6+6km",tag:"Paseo",url:"",note:"Desde la playa de São Pedro hasta el faro: 6km ida y 6km vuelta."}]},
+  {id:"d12",date:"Dom 23 Ago",place:"São Vicente → Praia",island:"São Vicente, Santiago",color:"#F97316",emoji:"🌙",hotel:"🏠 My Flat 2 (cerca aeropuerto)",hotelUrl:"https://www.booking.com/Share-YCb6LzZ",
+   items:[{icon:"✈️",text:"Vuelo a Praia · 21:30h",tag:"Vuelo",url:"",note:""},{icon:"😌",text:"Día libre / descanso antes del vuelo",tag:"Relax",url:"",note:""}]},
+  {id:"d13",date:"Lun 24 Ago",place:"¡Vuelta a Casa!",island:"Santiago",color:"#6B7280",emoji:"🏠",hotel:"",hotelUrl:"",
+   items:[{icon:"✈️",text:"Salida vuelo desde Praia · 12:25h",tag:"Vuelo",url:"",note:""},{icon:"🕐",text:"Check-out y traslado al aeropuerto",tag:"Transporte",url:"",note:""}]},
+];
+
+const STORAGE_KEY = 'caboVerde2026_v3';
+function loadState(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); }catch(e){}
+  return null;
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+let state = loadState() || {
+  trip: {...DEFAULT_TRIP},
+  days: JSON.parse(JSON.stringify(DEFAULT_DAYS)),
+  pending: JSON.parse(JSON.stringify(DEFAULT_PENDING)),
+  open: {},
+  filter: 'all',
+};
+// Migration: ensure note field on items
+state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
+if (!state.trip) state.trip = {...DEFAULT_TRIP};
+if (!state.filter) state.filter = 'all';
+if (!state.open) state.open = {};
+
+const uid = () => Math.random().toString(36).slice(2,9);
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function getIslandList(){
+  const set = new Set();
+  state.days.forEach(d => {
+    if (!d.island) return;
+    d.island.split(',').map(s => s.trim()).filter(Boolean).forEach(i => set.add(i));
+  });
+  return [...set];
+}
+
+// ───────── RENDER ─────────
+function render(){
+  document.getElementById('trip-label').textContent = state.trip.label;
+  document.getElementById('trip-title').textContent = state.trip.title;
+  document.getElementById('trip-sub').textContent  = state.trip.sub;
+
+  const islands = getIslandList();
+  document.getElementById('stat-days').textContent = state.days.length;
+  document.getElementById('stat-islands').textContent = islands.length;
+  document.getElementById('stat-items').textContent = state.days.reduce((a,d)=>a+d.items.length,0);
+  document.getElementById('stat-pending').textContent = state.pending.filter(p=>!p.done).length;
+
+  let fhtml = `<button class="filter-btn ${state.filter==='all'?'active':''}" data-filter="all">Todos</button>`;
+  islands.forEach(i => fhtml += `<button class="filter-btn ${state.filter===i?'active':''}" data-filter="${escapeHtml(i)}">${escapeHtml(i)}</button>`);
+  document.getElementById('filters').innerHTML = fhtml;
+
+  renderPending();
+  renderDays();
+}
+
+// EVENT DELEGATION for filters (fixes any onclick/escaping issues)
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (btn && btn.dataset.filter !== undefined) setFilter(btn.dataset.filter);
+});
+
+function renderPending(){
+  if (state.filter !== 'all'){ document.getElementById('pending-section').innerHTML=''; return; }
+  const done = state.pending.filter(p=>p.done).length;
+  const total = state.pending.length;
+  const isOpen = state.open['__pending'] !== false;
+  const urgColor = {alta:'#EF4444',media:'#F59E0B',baja:'#10B981'};
+  let html = `
+  <div class="card ${isOpen?'open':''}" style="margin-bottom:14px;">
+    <button class="card-header" style="border-left:4px solid #EF4444;" onclick="toggleOpen('__pending')">
+      <div class="card-emoji" style="background:#FEF2F2;">📋</div>
+      <div class="card-meta">
+        <div class="card-day" style="color:#EF4444;">Gestiones pendientes</div>
+        <div class="card-title">${done}/${total} completadas</div>
+      </div>
+      <span class="card-arrow">▶</span>
+    </button>
+    <div class="card-body">`;
+  state.pending.forEach(p => {
+    html += `
+    <div class="pending-item">
+      <div class="checkbox ${p.done?'done':''}" onclick="togglePending('${p.id}')"></div>
+      <div style="flex:1;opacity:${p.done?.45:1};min-width:0;">
+        <div class="pending-text ${p.done?'done':''}">${escapeHtml(p.text)}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          ${p.detail?`<span class="pending-detail">${escapeHtml(p.detail)}</span>`:''}
+          ${p.url?`<a href="${escapeHtml(p.url)}" target="_blank" onclick="event.stopPropagation()" style="font-size:9px;">🔗 abrir</a>`:''}
+        </div>
+      </div>
+      <div class="urgency-dot" style="background:${urgColor[p.urgency]||'#ccc'}" title="${p.urgency}"></div>
+      <button class="icon-btn" onclick="editPending('${p.id}')">✏️</button>
+    </div>`;
+  });
+  html += `<button class="add-item-btn" onclick="newPending()">＋ Nueva gestión</button>`;
+  html += `<p class="legend">🔴 urgente &nbsp;🟡 media &nbsp;🟢 baja</p></div></div>`;
+  document.getElementById('pending-section').innerHTML = html;
+}
+
+function renderDays(){
+  const f = state.filter;
+  const filtered = f === 'all' ? state.days : state.days.filter(d => {
+    if (!d.island) return false;
+    return d.island.split(',').map(s => s.trim()).includes(f);
+  });
+  let html = '';
+  filtered.forEach(day => {
+    const isOpen = !!state.open[day.id];
+    const hasPending = day.items.some(i => i.tag === 'Pendiente');
+    html += `
+    <div class="card ${isOpen?'open':''}" id="card-${day.id}">
+      <button class="card-header" style="border-left:4px solid ${day.color};" onclick="toggleOpen('${day.id}')">
+        <div class="card-emoji" style="background:${day.color}22;">${day.emoji||'📍'}</div>
+        <div class="card-meta">
+          <div class="card-day" style="color:${day.color};">
+            <span>${escapeHtml(day.date)}</span>
+            ${hasPending?'<span class="pending-badge">⚠️ PEND.</span>':''}
+          </div>
+          <div class="card-title">${escapeHtml(day.place)}</div>
+          <div class="card-island">${escapeHtml(day.island||'')}</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </button>
+      <div class="card-body">`;
+
+    day.items.forEach((item, i) => {
+      const noteId = `note-${day.id}-${i}`;
+      const hasNote = item.note && item.note.trim().length > 0;
+      html += `
+      <div class="item">
+        <span class="item-icon">${item.icon||'•'}</span>
+        <div class="item-content">
+          <div class="item-text">${escapeHtml(item.text)}</div>
+          <div class="item-tags">
+            <span class="tag tag-${item.tag||'Otro'}">${escapeHtml(item.tag||'Otro')}</span>
+            ${item.url?`<a class="tag-link-small" href="${escapeHtml(item.url)}" target="_blank">🔗 enlace</a>`:''}
+            ${hasNote?`<button class="note-toggle" onclick="toggleNote('${noteId}')">📝 nota</button>`:''}
+          </div>
+          ${hasNote?`<div class="item-note" id="${noteId}">${escapeHtml(item.note)}</div>`:''}
+        </div>
+        <div class="item-actions">
+          <button class="icon-btn" onclick="editItem('${day.id}',${i})">✏️</button>
+        </div>
+      </div>`;
+    });
+
+    html += `<button class="add-item-btn" onclick="newItem('${day.id}')">＋ Añadir actividad</button>`;
+
+    if (day.hotel) {
+      html += `<div class="hotel-footer" onclick="editHotel('${day.id}')">
+        <div class="hotel-left">
+          <span>🏨</span>`;
+      if (day.hotelUrl) html += `<a href="${escapeHtml(day.hotelUrl)}" target="_blank" onclick="event.stopPropagation()" class="hotel-name">${escapeHtml(day.hotel)}</a>`;
+      else html += `<span class="hotel-name">${escapeHtml(day.hotel)}</span>`;
+      html += `</div><span style="color:#94A3B8;font-size:11px;">✏️</span></div>`;
+    } else {
+      html += `<button class="add-item-btn" style="background:#FFF7ED;border-color:#FED7AA;color:#C2410C;margin-top:10px;" onclick="editHotel('${day.id}')">＋ Añadir alojamiento</button>`;
+    }
+
+    html += `
+        <div class="day-actions">
+          <button class="day-action-btn" onclick="editDay('${day.id}')">✏️ Editar día</button>
+          <button class="day-action-btn" onclick="duplicateDay('${day.id}')">📋 Duplicar</button>
+          <button class="day-action-btn danger" onclick="deleteDay('${day.id}')">🗑 Borrar</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('days-container').innerHTML = html;
+}
+
+// ───────── ACTIONS ─────────
+function toggleOpen(id){
+  state.open[id] = !state.open[id];
+  saveState();
+  if (id === '__pending') renderPending(); else renderDays();
+}
+function setFilter(f){
+  state.filter = f;
+  saveState();
+  render();
+}
+function togglePending(id){
+  const p = state.pending.find(x=>x.id===id);
+  if (!p) return;
+  p.done = !p.done;
+  saveState(); render();
+}
+function toggleNote(id){
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ───────── MODALS ─────────
+function openModal(html){
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  document.body.style.overflow='';
+}
+
+let editingCtx = null;
+
+function editTrip(){
+  editingCtx = {type:'trip'};
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar cabecera</div>
+    <div class="modal-subtitle">Personaliza el título del viaje</div>
+    <div class="field"><label class="field-label">Etiqueta superior</label>
+      <input class="field-input" id="f-label" value="${escapeHtml(state.trip.label)}"></div>
+    <div class="field"><label class="field-label">Título</label>
+      <input class="field-input" id="f-title" value="${escapeHtml(state.trip.title)}"></div>
+    <div class="field"><label class="field-label">Subtítulo</label>
+      <input class="field-input" id="f-sub" value="${escapeHtml(state.trip.sub)}"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveTrip()">Guardar</button>
+    </div>
+  `);
+}
+function saveTrip(){
+  state.trip.label = document.getElementById('f-label').value;
+  state.trip.title = document.getElementById('f-title').value;
+  state.trip.sub   = document.getElementById('f-sub').value;
+  saveState(); render(); closeModal();
+}
+
+function newDay(){
+  const newD = {id:'d'+uid(),date:'Día nuevo',place:'Sin título',island:'',color:'#4A90D9',emoji:'📍',hotel:'',hotelUrl:'',items:[]};
+  state.days.push(newD);
+  saveState();
+  state.open[newD.id] = true;
+  render();
+  editDay(newD.id);
+}
+function editDay(id){
+  const d = state.days.find(x=>x.id===id);
+  if (!d) return;
+  editingCtx = {type:'day',id};
+  openModal(buildDayForm(d));
+  setupIconGrid('grid-emoji', d.emoji||'📍');
+  setupColorGrid('grid-color', d.color);
+}
+function buildDayForm(d){
+  return `
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar día</div>
+    <div class="modal-subtitle">Cambia título, fecha, isla y aspecto</div>
+    <div class="field"><label class="field-label">Fecha / etiqueta</label>
+      <input class="field-input" id="f-date" value="${escapeHtml(d.date)}" placeholder="ej: Mié 12 Ago"></div>
+    <div class="field"><label class="field-label">Lugar / título</label>
+      <input class="field-input" id="f-place" value="${escapeHtml(d.place)}"></div>
+    <div class="field"><label class="field-label">Isla / región</label>
+      <input class="field-input" id="f-island" value="${escapeHtml(d.island||'')}" placeholder="ej: Santiago (o varias separadas por coma)"></div>
+    <div class="field"><label class="field-label">Emoji</label>
+      <div class="icon-grid" id="grid-emoji"></div></div>
+    <div class="field"><label class="field-label">Color</label>
+      <div class="color-grid" id="grid-color"></div></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveDay()">Guardar</button>
+    </div>
+  `;
+}
+function saveDay(){
+  const d = state.days.find(x=>x.id===editingCtx.id);
+  if (!d) return;
+  d.date = document.getElementById('f-date').value;
+  d.place = document.getElementById('f-place').value;
+  d.island = document.getElementById('f-island').value;
+  d.emoji = document.querySelector('#grid-emoji .selected')?.dataset.icon || d.emoji;
+  d.color = document.querySelector('#grid-color .selected')?.dataset.color || d.color;
+  saveState(); render(); closeModal();
+}
+function deleteDay(id){
+  if (!confirm('¿Borrar este día? Se perderán todas sus actividades.')) return;
+  state.days = state.days.filter(x=>x.id!==id);
+  delete state.open[id];
+  saveState(); render();
+}
+function duplicateDay(id){
+  const d = state.days.find(x=>x.id===id);
+  if (!d) return;
+  const copy = JSON.parse(JSON.stringify(d));
+  copy.id = 'd'+uid();
+  copy.place = d.place + ' (copia)';
+  const idx = state.days.findIndex(x=>x.id===id);
+  state.days.splice(idx+1, 0, copy);
+  saveState(); render();
+}
+
+// HOTEL EDIT
+function editHotel(dayId){
+  const d = state.days.find(x=>x.id===dayId);
+  if (!d) return;
+  editingCtx = {type:'hotel',dayId};
+  const hasHotel = !!(d.hotel && d.hotel.length);
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">${hasHotel?'Editar alojamiento':'Añadir alojamiento'}</div>
+    <div class="modal-subtitle">${escapeHtml(d.date)} · ${escapeHtml(d.place)}</div>
+    <div class="field"><label class="field-label">Nombre</label>
+      <input class="field-input" id="f-hname" value="${escapeHtml(d.hotel||'')}" placeholder="ej: 🏠 Casa Sodadi"></div>
+    <div class="field"><label class="field-label">URL (Booking, Airbnb, etc.)</label>
+      <input class="field-input" id="f-hurl" value="${escapeHtml(d.hotelUrl||'')}" placeholder="https://..."></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveHotel()">Guardar</button>
+    </div>
+    ${hasHotel?'<button class="btn-danger-full" onclick="clearHotel()">🗑 Quitar alojamiento</button>':''}
+  `);
+}
+function saveHotel(){
+  const d = state.days.find(x=>x.id===editingCtx.dayId);
+  if (!d) return;
+  d.hotel = document.getElementById('f-hname').value;
+  d.hotelUrl = document.getElementById('f-hurl').value;
+  saveState(); render(); closeModal();
+}
+function clearHotel(){
+  if (!confirm('¿Quitar el alojamiento de este día?')) return;
+  const d = state.days.find(x=>x.id===editingCtx.dayId);
+  if (!d) return;
+  d.hotel = ''; d.hotelUrl = '';
+  saveState(); render(); closeModal();
+}
+
+// ITEM
+function newItem(dayId){
+  editingCtx = {type:'item',dayId,isNew:true};
+  const item = {icon:'📍',text:'',tag:'Visita',url:'',note:''};
+  openModal(buildItemForm(item, true));
+  setupIconGrid('grid-icon', item.icon);
+  setupTagGrid('grid-tag', item.tag);
+}
+function editItem(dayId, idx){
+  const d = state.days.find(x=>x.id===dayId);
+  if (!d) return;
+  const item = d.items[idx];
+  editingCtx = {type:'item',dayId,idx};
+  openModal(buildItemForm(item, false));
+  setupIconGrid('grid-icon', item.icon);
+  setupTagGrid('grid-tag', item.tag);
+}
+function buildItemForm(item, isNew){
+  return `
+    <div class="modal-handle"></div>
+    <div class="modal-title">${isNew?'Nueva actividad':'Editar actividad'}</div>
+    <div class="modal-subtitle">Añade detalles, etiqueta, enlaces y notas</div>
+    <div class="field"><label class="field-label">Descripción</label>
+      <textarea class="field-textarea" id="f-text" placeholder="ej: Cena en el restaurante...">${escapeHtml(item.text)}</textarea></div>
+    <div class="field"><label class="field-label">Icono</label>
+      <div class="icon-grid" id="grid-icon"></div></div>
+    <div class="field"><label class="field-label">Etiqueta</label>
+      <div class="tag-grid" id="grid-tag"></div></div>
+    <div class="field"><label class="field-label">URL (opcional)</label>
+      <input class="field-input" id="f-url" value="${escapeHtml(item.url||'')}" placeholder="https://..."></div>
+    <div class="field"><label class="field-label">📝 Nota (oculta hasta que se pulsa)</label>
+      <textarea class="field-textarea large" id="f-note" placeholder="Detalles, recomendaciones, recordatorios...">${escapeHtml(item.note||'')}</textarea></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveItem()">Guardar</button>
+    </div>
+    ${isNew?'':'<button class="btn-danger-full" onclick="deleteItem()">🗑 Borrar actividad</button>'}
+  `;
+}
+function saveItem(){
+  const d = state.days.find(x=>x.id===editingCtx.dayId);
+  if (!d) return;
+  const data = {
+    icon: document.querySelector('#grid-icon .selected')?.dataset.icon || '📍',
+    text: document.getElementById('f-text').value,
+    tag: document.querySelector('#grid-tag .selected')?.dataset.tag || 'Otro',
+    url: document.getElementById('f-url').value,
+    note: document.getElementById('f-note').value,
+  };
+  if (editingCtx.isNew) d.items.push(data);
+  else d.items[editingCtx.idx] = data;
+  saveState(); render(); closeModal();
+}
+function deleteItem(){
+  if (!confirm('¿Borrar esta actividad?')) return;
+  const d = state.days.find(x=>x.id===editingCtx.dayId);
+  if (!d) return;
+  d.items.splice(editingCtx.idx, 1);
+  saveState(); render(); closeModal();
+}
+
+// PENDING
+function newPending(){
+  editingCtx = {type:'pending',isNew:true};
+  const p = {id:'p'+uid(),text:'',detail:'',url:'',urgency:'media',done:false};
+  openModal(buildPendingForm(p, true));
+  setupUrgencyGrid('grid-urgency', p.urgency);
+}
+function editPending(id){
+  const p = state.pending.find(x=>x.id===id);
+  if (!p) return;
+  editingCtx = {type:'pending',id};
+  openModal(buildPendingForm(p, false));
+  setupUrgencyGrid('grid-urgency', p.urgency);
+}
+function buildPendingForm(p, isNew){
+  return `
+    <div class="modal-handle"></div>
+    <div class="modal-title">${isNew?'Nueva gestión':'Editar gestión'}</div>
+    <div class="modal-subtitle">Tareas pendientes antes del viaje</div>
+    <div class="field"><label class="field-label">Tarea</label>
+      <input class="field-input" id="f-ptext" value="${escapeHtml(p.text)}" placeholder="ej: Comprar billetes..."></div>
+    <div class="field"><label class="field-label">Detalle (opcional)</label>
+      <input class="field-input" id="f-pdetail" value="${escapeHtml(p.detail||'')}" placeholder="ej: 30€ por persona"></div>
+    <div class="field"><label class="field-label">URL (opcional)</label>
+      <input class="field-input" id="f-purl" value="${escapeHtml(p.url||'')}" placeholder="https://..."></div>
+    <div class="field"><label class="field-label">Urgencia</label>
+      <div class="urgency-grid" id="grid-urgency">
+        <button class="urgency-pick" data-u="alta">🔴 Alta</button>
+        <button class="urgency-pick" data-u="media">🟡 Media</button>
+        <button class="urgency-pick" data-u="baja">🟢 Baja</button>
+      </div></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="savePending(${isNew?'true':'false'})">Guardar</button>
+    </div>
+    ${isNew?'':'<button class="btn-danger-full" onclick="deletePending()">🗑 Borrar gestión</button>'}
+  `;
+}
+function savePending(isNew){
+  const data = {
+    text: document.getElementById('f-ptext').value,
+    detail: document.getElementById('f-pdetail').value,
+    url: document.getElementById('f-purl').value,
+    urgency: document.querySelector('#grid-urgency .selected')?.dataset.u || 'media',
+  };
+  if (isNew){
+    state.pending.push({id:'p'+uid(),done:false,...data});
+  } else {
+    const p = state.pending.find(x=>x.id===editingCtx.id);
+    Object.assign(p, data);
+  }
+  saveState(); render(); closeModal();
+}
+function deletePending(){
+  if (!confirm('¿Borrar esta gestión?')) return;
+  state.pending = state.pending.filter(x=>x.id!==editingCtx.id);
+  saveState(); render(); closeModal();
+}
+
+// PICKERS
+function setupIconGrid(elId, current){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = ICONS.map(ic => `<div class="icon-cell ${ic===current?'selected':''}" data-icon="${ic}">${ic}</div>`).join('');
+  el.querySelectorAll('.icon-cell').forEach(c => c.onclick = () => {
+    el.querySelectorAll('.icon-cell').forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected');
+  });
+}
+function setupColorGrid(elId, current){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = COLORS.map(c => `<div class="color-cell ${c===current?'selected':''}" data-color="${c}" style="background:${c}"></div>`).join('');
+  el.querySelectorAll('.color-cell').forEach(c => c.onclick = () => {
+    el.querySelectorAll('.color-cell').forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected');
+  });
+}
+function setupTagGrid(elId, current){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = TAGS.map(t => `<button class="tag-pick tag-${t} ${t===current?'selected':''}" data-tag="${t}">${t}</button>`).join('');
+  el.querySelectorAll('.tag-pick').forEach(b => b.onclick = () => {
+    el.querySelectorAll('.tag-pick').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+  });
+}
+function setupUrgencyGrid(elId, current){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.querySelectorAll('.urgency-pick').forEach(b => {
+    if (b.dataset.u === current) b.classList.add('selected');
+    b.onclick = () => {
+      el.querySelectorAll('.urgency-pick').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+    };
+  });
+}
+
+// MENU
+function showMenu(){
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">Acciones</div>
+    <div class="modal-subtitle">¿Qué quieres hacer?</div>
+    <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="closeModal();newDay();">＋ Añadir nuevo día</button>
+    <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="closeModal();newPending();">＋ Nueva gestión pendiente</button>
+    <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="closeModal();editTrip();">✏️ Editar cabecera del viaje</button>
+    <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="exportData()">📥 Exportar datos (JSON)</button>
+    <button class="day-action-btn danger" style="width:100%;padding:13px;font-size:13px;" onclick="resetAll()">🔄 Restablecer todo</button>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cerrar</button></div>
+  `);
+}
+function exportData(){
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'cabo-verde-2026.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  closeModal();
+}
+function resetAll(){
+  if (!confirm('¿Borrar TODOS tus cambios y volver al plan original?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+render();
+</script>
+</body>
+</html>

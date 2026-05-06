@@ -170,7 +170,7 @@
   <button class="add-item-btn" style="margin-top:14px;" onclick="newDay()">＋ Añadir día</button>
 </div>
 
-<button class="fab" onclick="showMenu()">＋</button>
+<button class="fab" id="fab" onclick="showMenu()">＋</button>
 
 <div class="modal-backdrop" id="modal" onclick="if(event.target.id==='modal')closeModal()">
   <div class="modal" id="modal-body"></div>
@@ -222,20 +222,148 @@ const DEFAULT_DAYS = [
    items:[{icon:"✈️",text:"Salida vuelo desde Praia · 12:25h",tag:"Vuelo",url:"",note:""},{icon:"🕐",text:"Check-out y traslado al aeropuerto",tag:"Transporte",url:"",note:""}]},
 ];
 
-const STORAGE_KEY = 'caboVerde2026_v3';
-function loadState(){
-  try{ const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); }catch(e){}
-  return null;
-}
-function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+// ═══════════ CONFIGURACIÓN JSONBin.io ═══════════
+// 1. ID del bin:
+const BIN_ID = '69fbcee4c0954111d8e90b8b';
+// 2. Master Key:
+const MASTER_KEY = '$2a$10$80q7mRKJnJXRjfl95px7uOzeI8wKVCZxiWCOloD6WSIArf/sIvJkW';
+// 3. Contraseña para EDITAR (leer es libre):
+const EDIT_PASSWORD = 'elefante';
+// ════════════════════════════════════════════════
 
-let state = loadState() || {
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const STORAGE_KEY = 'caboVerde2026_v3'; // backup local por si falla la red
+
+// Estado por defecto
+const DEFAULT_STATE = {
   trip: {...DEFAULT_TRIP},
   days: JSON.parse(JSON.stringify(DEFAULT_DAYS)),
   pending: JSON.parse(JSON.stringify(DEFAULT_PENDING)),
   open: {},
   filter: 'all',
 };
+
+// Indicador visual de estado de sincronización
+function showSyncStatus(text, color){
+  let el = document.getElementById('sync-status');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'sync-status';
+    el.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(11,37,69,0.92);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;z-index:200;backdrop-filter:blur(8px);transition:opacity .3s;letter-spacing:.04em;';
+    document.body.appendChild(el);
+  }
+  el.style.background = color || 'rgba(11,37,69,0.92)';
+  el.textContent = text;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
+
+// Carga desde la nube (con fallback a local si falla)
+async function loadStateFromCloud(){
+  if (!BIN_ID || BIN_ID === 'PEGA_AQUI_TU_BIN_ID'){
+    showSyncStatus('⚠️ Sin configurar — modo local', '#B45309');
+    return loadStateLocal();
+  }
+  try {
+    showSyncStatus('☁️ Cargando...');
+    const res = await fetch(BIN_URL + '/latest', {
+      headers: { 'X-Master-Key': MASTER_KEY }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const cloud = data.record;
+    // Si el bin está vacío, usa los datos por defecto
+    if (!cloud || !cloud.days || cloud.days.length === 0){
+      showSyncStatus('☁️ Inicializando...', '#0369A1');
+      return JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+    // Backup local
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(cloud)); }catch(e){}
+    showSyncStatus('☁️ Sincronizado', '#15803D');
+    return cloud;
+  } catch (e) {
+    console.error('Error cargando de la nube:', e);
+    showSyncStatus('⚠️ Sin conexión — modo local', '#B45309');
+    return loadStateLocal();
+  }
+}
+function loadStateLocal(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+
+// Guarda en la nube (con debounce para no saturar la API)
+let saveTimer = null;
+function saveState(){
+  // Backup local inmediato
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  // Sube a la nube tras 1 segundo de inactividad
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveStateToCloud, 1000);
+}
+async function saveStateToCloud(){
+  if (!BIN_ID || BIN_ID === 'PEGA_AQUI_TU_BIN_ID') return;
+  try {
+    showSyncStatus('☁️ Guardando...');
+    const res = await fetch(BIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': MASTER_KEY
+      },
+      body: JSON.stringify(state)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showSyncStatus('☁️ Guardado', '#15803D');
+  } catch (e) {
+    console.error('Error guardando:', e);
+    showSyncStatus('⚠️ Error al guardar (guardado local)', '#B45309');
+  }
+}
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+// ═══ MODO EDICIÓN ═══
+const EDIT_MODE_KEY = 'caboVerde2026_editMode';
+let editMode = localStorage.getItem(EDIT_MODE_KEY) === 'true';
+
+function isEditMode(){ return editMode; }
+
+function requestEditMode(){
+  const pwd = prompt('🔒 Contraseña para editar:');
+  if (pwd === null) return false; // canceló
+  if (pwd === EDIT_PASSWORD){
+    editMode = true;
+    localStorage.setItem(EDIT_MODE_KEY, 'true');
+    showSyncStatus('🔓 Modo edición activado', '#15803D');
+    render();
+    return true;
+  } else {
+    alert('❌ Contraseña incorrecta');
+    return false;
+  }
+}
+
+function exitEditMode(){
+  editMode = false;
+  localStorage.removeItem(EDIT_MODE_KEY);
+  showSyncStatus('🔒 Modo solo lectura', '#475569');
+  render();
+}
+
+// Wrapper: comprueba modo edición antes de cualquier acción de escritura
+function requireEdit(fn){
+  return function(...args){
+    if (!isEditMode()){
+      if (!requestEditMode()) return;
+    }
+    return fn.apply(this, args);
+  };
+}
 // Migration: ensure note field on items
 state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
 if (!state.trip) state.trip = {...DEFAULT_TRIP};
@@ -278,6 +406,14 @@ function render(){
 
   renderPending();
   renderDays();
+  // Actualiza FAB según modo edición
+  const fab = document.getElementById('fab');
+  if (fab){
+    fab.textContent = isEditMode() ? '＋' : '🔒';
+    fab.style.background = isEditMode()
+      ? 'linear-gradient(135deg,#1B6CA8,#0B2545)'
+      : 'linear-gradient(135deg,#64748B,#334155)';
+  }
 }
 
 // EVENT DELEGATION (segunda capa de seguridad)
@@ -408,12 +544,12 @@ function setFilter(f){
   // Confirmación visual rápida (en caso de bug visual)
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
-function togglePending(id){
+const togglePending = requireEdit(function(id){
   const p = state.pending.find(x=>x.id===id);
   if (!p) return;
   p.done = !p.done;
   saveState(); render();
-}
+});
 function toggleNote(id){
   const el = document.getElementById(id);
   if (el) el.classList.toggle('open');
@@ -433,6 +569,7 @@ function closeModal(){
 let editingCtx = null;
 
 function editTrip(){
+  if (!isEditMode() && !requestEditMode()) return;
   editingCtx = {type:'trip'};
   openModal(`
     <div class="modal-handle"></div>
@@ -458,6 +595,7 @@ function saveTrip(){
 }
 
 function newDay(){
+  if (!isEditMode() && !requestEditMode()) return;
   const newD = {id:'d'+uid(),date:'Día nuevo',place:'Sin título',island:'',color:'#4A90D9',emoji:'📍',hotel:'',hotelUrl:'',items:[]};
   state.days.push(newD);
   saveState();
@@ -466,6 +604,7 @@ function newDay(){
   editDay(newD.id);
 }
 function editDay(id){
+  if (!isEditMode() && !requestEditMode()) return;
   const d = state.days.find(x=>x.id===id);
   if (!d) return;
   editingCtx = {type:'day',id};
@@ -505,12 +644,14 @@ function saveDay(){
   saveState(); render(); closeModal();
 }
 function deleteDay(id){
+  if (!isEditMode() && !requestEditMode()) return;
   if (!confirm('¿Borrar este día? Se perderán todas sus actividades.')) return;
   state.days = state.days.filter(x=>x.id!==id);
   delete state.open[id];
   saveState(); render();
 }
 function duplicateDay(id){
+  if (!isEditMode() && !requestEditMode()) return;
   const d = state.days.find(x=>x.id===id);
   if (!d) return;
   const copy = JSON.parse(JSON.stringify(d));
@@ -523,6 +664,7 @@ function duplicateDay(id){
 
 // HOTEL EDIT
 function editHotel(dayId){
+  if (!isEditMode() && !requestEditMode()) return;
   const d = state.days.find(x=>x.id===dayId);
   if (!d) return;
   editingCtx = {type:'hotel',dayId};
@@ -559,6 +701,7 @@ function clearHotel(){
 
 // ITEM
 function newItem(dayId){
+  if (!isEditMode() && !requestEditMode()) return;
   editingCtx = {type:'item',dayId,isNew:true};
   const item = {icon:'📍',text:'',tag:'Visita',url:'',note:''};
   openModal(buildItemForm(item, true));
@@ -566,6 +709,7 @@ function newItem(dayId){
   setupTagGrid('grid-tag', item.tag);
 }
 function editItem(dayId, idx){
+  if (!isEditMode() && !requestEditMode()) return;
   const d = state.days.find(x=>x.id===dayId);
   if (!d) return;
   const item = d.items[idx];
@@ -620,12 +764,14 @@ function deleteItem(){
 
 // PENDING
 function newPending(){
+  if (!isEditMode() && !requestEditMode()) return;
   editingCtx = {type:'pending',isNew:true};
   const p = {id:'p'+uid(),text:'',detail:'',url:'',urgency:'media',done:false};
   openModal(buildPendingForm(p, true));
   setupUrgencyGrid('grid-urgency', p.urgency);
 }
 function editPending(id){
+  if (!isEditMode() && !requestEditMode()) return;
   const p = state.pending.find(x=>x.id===id);
   if (!p) return;
   editingCtx = {type:'pending',id};
@@ -722,10 +868,15 @@ function showMenu(){
   openModal(`
     <div class="modal-handle"></div>
     <div class="modal-title">Acciones</div>
-    <div class="modal-subtitle">¿Qué quieres hacer?</div>
+    <div class="modal-subtitle">${isEditMode()?'🔓 Modo edición activo':'🔒 Modo solo lectura'}</div>
+    ${isEditMode()
+      ? `<button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:10px;background:#FEF3C7;color:#92400E;font-weight:700;" onclick="closeModal();exitEditMode();">🔒 Bloquear edición</button>`
+      : `<button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:10px;background:#D1FAE5;color:#065F46;font-weight:700;" onclick="closeModal();requestEditMode();">🔓 Desbloquear edición</button>`
+    }
     <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="closeModal();newDay();">＋ Añadir nuevo día</button>
     <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="closeModal();newPending();">＋ Nueva gestión pendiente</button>
     <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="closeModal();editTrip();">✏️ Editar cabecera del viaje</button>
+    <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="reloadFromCloud()">🔄 Recargar desde la nube</button>
     <button class="day-action-btn" style="width:100%;padding:13px;font-size:13px;margin-bottom:6px;" onclick="exportData()">📥 Exportar datos (JSON)</button>
     <button class="day-action-btn danger" style="width:100%;padding:13px;font-size:13px;" onclick="resetAll()">🔄 Restablecer todo</button>
     <div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cerrar</button></div>
@@ -741,13 +892,36 @@ function exportData(){
   URL.revokeObjectURL(url);
   closeModal();
 }
-function resetAll(){
-  if (!confirm('¿Borrar TODOS tus cambios y volver al plan original?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
+async function reloadFromCloud(){
+  closeModal();
+  state = await loadStateFromCloud();
+  if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
+  if (!state.trip) state.trip = {...DEFAULT_TRIP};
+  if (!state.filter) state.filter = 'all';
+  if (!state.open) state.open = {};
+  render();
 }
 
-render();
+function resetAll(){
+  if (!isEditMode() && !requestEditMode()) return;
+  if (!confirm('¿Borrar TODOS tus cambios y volver al plan original? (también en la nube)')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  saveStateToCloud();
+  render();
+  closeModal();
+}
+
+// INIT: carga desde la nube y luego renderiza
+(async function init(){
+  state = await loadStateFromCloud();
+  // Migración: asegura que cada item tenga campo note
+  if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
+  if (!state.trip) state.trip = {...DEFAULT_TRIP};
+  if (!state.filter) state.filter = 'all';
+  if (!state.open) state.open = {};
+  render();
+})();
 </script>
 </body>
 </html>

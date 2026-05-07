@@ -6,7 +6,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cabo Verde">
+<meta name="theme-color" content="#0B2545">
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Cabo%20Verde%202026%22%2C%22short_name%22%3A%22Cabo%20Verde%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230B2545%22%2C%22theme_color%22%3A%22%230B2545%22%2C%22icons%22%3A%5B%5D%7D">
 <title>🌊 Cabo Verde 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -145,9 +153,64 @@
   .tag-Actividad{background:#FAF5FF;color:#7C3AED;}
   .tag-Relax{background:#FFF7ED;color:#9A3412;}
   .tag-Otro{background:#F3F4F6;color:#374151;}
+
+  /* COUNTDOWN BANNER */
+  .countdown{background:rgba(255,255,255,0.13);backdrop-filter:blur(8px);border-radius:14px;padding:10px 14px;margin-top:12px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,0.1);}
+  .countdown-icon{font-size:22px;}
+  .countdown-text{flex:1;color:#fff;}
+  .countdown-num{font-size:22px;font-weight:700;line-height:1;font-family:'Playfair Display',serif;}
+  .countdown-label{font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;}
+
+  /* TODAY HIGHLIGHT */
+  .card.is-today{box-shadow:0 0 0 3px #FACC15,0 8px 30px rgba(250,204,21,0.35);animation:todayPulse 2.5s ease-in-out infinite;}
+  @keyframes todayPulse{0%,100%{box-shadow:0 0 0 3px #FACC15,0 8px 30px rgba(250,204,21,0.35);}50%{box-shadow:0 0 0 4px #FACC15,0 8px 36px rgba(250,204,21,0.55);}}
+  .today-badge{font-size:9px;background:#FACC15;color:#713F12;padding:2px 7px;border-radius:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+
+  /* VIEW TOGGLE */
+  .view-toggle{display:flex;background:#fff;border-radius:14px;padding:4px;gap:2px;margin:0 4px 12px;box-shadow:0 1px 6px rgba(0,0,0,0.05);}
+  .view-toggle button{flex:1;background:none;border:none;padding:9px;font-size:12px;font-weight:700;color:#94A3B8;cursor:pointer;border-radius:10px;transition:all .15s;}
+  .view-toggle button.active{background:linear-gradient(135deg,#1B6CA8,#0B2545);color:#fff;}
+
+  /* MAP VIEW */
+  #map-view{display:none;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.05);}
+  #map-view.active{display:block;}
+  #map-container{height:65vh;min-height:400px;width:100%;}
+  .map-legend{padding:10px 14px;font-size:11px;color:#64748B;border-top:1px solid #F1F5F9;}
+  .leaflet-popup-content-wrapper{border-radius:12px!important;}
+  .leaflet-popup-content{margin:10px 14px!important;font-family:'DM Sans',sans-serif!important;}
+  .map-popup-title{font-size:13px;font-weight:700;color:#111;margin-bottom:3px;}
+  .map-popup-date{font-size:10px;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+  .map-popup-btn{display:inline-block;background:#0B2545;color:#fff!important;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;margin-top:4px;}
+  .day-marker{background:transparent;border:none;}
+  .day-marker-pin{width:32px;height:32px;border-radius:50% 50% 50% 0;background:#0B2545;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,0.3);}
+  .day-marker-pin span{transform:rotate(45deg);font-size:14px;}
+  .day-marker.today .day-marker-pin{background:#FACC15!important;animation:todayPulse 2.5s ease-in-out infinite;}
+
+  /* OFFLINE INDICATOR */
+  .offline-bar{position:fixed;top:0;left:0;right:0;background:#B45309;color:#fff;text-align:center;padding:6px;font-size:11px;font-weight:700;z-index:300;display:none;}
+  .offline-bar.show{display:block;}
+  body.is-offline{padding-top:28px;}
+
+  /* WEATHER CHIP */
+  .weather-chip{font-size:10px;background:#F0F9FF;color:#075985;padding:2px 7px;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+  .weather-chip .w-rain{color:#0EA5E9;font-weight:700;margin-left:3px;}
+
+  /* DRAG & DROP */
+  .drag-handle{background:#F1F5F9!important;color:#94A3B8!important;border:none;cursor:grab;font-size:14px;padding:4px 8px;border-radius:6px;line-height:1;touch-action:none;}
+  .drag-handle:active{cursor:grabbing;background:#E2E8F0!important;}
+  .sortable-ghost{opacity:0.3;background:#FEF9C3!important;}
+  .sortable-chosen{background:#FEF9C3!important;}
+  .sortable-drag{box-shadow:0 8px 30px rgba(0,0,0,0.2)!important;border-radius:10px!important;}
+  .items-wrap{}
+
+  /* DAY REORDER BUTTONS */
+  .day-action-btn.reorder{flex:0 0 auto;width:38px;padding:7px 0;}
+  .day-action-btn:disabled{opacity:0.35;cursor:not-allowed;}
 </style>
 </head>
 <body>
+
+<div class="offline-bar" id="offline-bar">📵 Sin conexión — modo local</div>
 
 <div class="hero">
   <div class="hero-circle1"></div><div class="hero-circle2"></div>
@@ -161,13 +224,24 @@
     <div class="stat"><div class="stat-n" id="stat-pending">0</div><div class="stat-l">pend.</div></div>
   </div>
   <div class="filters" id="filters"></div>
+  <div id="countdown-banner"></div>
 </div>
 
 <div class="content">
-  <div id="pending-section"></div>
-  <p class="section-label">Itinerario · toca cualquier elemento para editarlo</p>
-  <div id="days-container"></div>
-  <button class="add-item-btn" style="margin-top:14px;" onclick="newDay()">＋ Añadir día</button>
+  <div class="view-toggle">
+    <button id="btn-list" class="active" onclick="switchView('list')">📋 Lista</button>
+    <button id="btn-map" onclick="switchView('map')">🗺️ Mapa</button>
+  </div>
+  <div id="list-view">
+    <div id="pending-section"></div>
+    <p class="section-label">Itinerario · toca cualquier elemento para editarlo</p>
+    <div id="days-container"></div>
+    <button class="add-item-btn" style="margin-top:14px;" onclick="newDay()">＋ Añadir día</button>
+  </div>
+  <div id="map-view">
+    <div id="map-container"></div>
+    <div class="map-legend">📍 Toca un marcador para ver el día. Estrella amarilla = día actual.</div>
+  </div>
 </div>
 
 <button class="fab" id="fab" onclick="showMenu()">＋</button>
@@ -181,7 +255,108 @@ const TAGS = ['Vuelo','Transporte','Visita','Playa','Paseo','Comer','Noche','Pen
 const COLORS = ['#E8705A','#8B5CF6','#10B981','#F59E0B','#4A90D9','#06B6D4','#84CC16','#3B82F6','#22C55E','#16A34A','#0EA5E9','#F97316','#6B7280','#EC4899','#14B8A6'];
 const ICONS = ['✈️','🛬','🚕','🚗','🚂','🚌','⛴️','🏛️','⛪','🔭','🛍️','🏖️','🌅','🍽️','🎵','🍴','🍕','🍝','🍷','🥾','🥬','⛰️','🌋','🌿','🥭','🌊','🏔️','🏘️','🏰','🌆','🌙','🐢','📸','🛒','🎟️','⚠️','📝','🌴','🧗','🚶','😌','🕐','🏠','🏨','🌐','🎨','⛵','🌺','🦜','📍'];
 
-const DEFAULT_TRIP = {label:'Verano 2026',title:'🌊 Cabo Verde',sub:'📅 12 – 24 de Agosto · 13 días'};
+const DEFAULT_TRIP = {label:'Verano 2026',title:'🌊 Cabo Verde',sub:'📅 12 – 24 de Agosto · 13 días',tripYear:2026};
+
+// Coordenadas por defecto para cada día (lat, lng)
+const DEFAULT_COORDS = {
+  d1:  {lat:14.9177, lng:-23.5092, label:'Praia'},
+  d2:  {lat:15.2742, lng:-23.7472, label:'Tarrafal'},
+  d3:  {lat:15.1797, lng:-23.6244, label:'Serra Malagueta'},
+  d4:  {lat:15.0850, lng:-23.6230, label:'Picos de Santiago'},
+  d5:  {lat:16.8901, lng:-24.9817, label:'Mindelo'},
+  d6:  {lat:16.8901, lng:-24.9817, label:'Mindelo'},
+  d7:  {lat:17.1840, lng:-25.0710, label:'Ribeira Grande'},
+  d8:  {lat:17.2030, lng:-25.0890, label:'Ponta do Sol'},
+  d9:  {lat:17.0794, lng:-25.1483, label:'Vale do Paul'},
+  d10: {lat:17.0794, lng:-25.1483, label:'Vale do Paul'},
+  d11: {lat:16.8200, lng:-25.0700, label:'São Pedro'},
+  d12: {lat:14.9177, lng:-23.5092, label:'Praia'},
+  d13: {lat:14.9177, lng:-23.5092, label:'Praia (aeropuerto)'},
+};
+
+// Parser de fechas tipo "Mié 12 Ago" → Date object
+const MONTHS = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};
+function parseDate(dateStr, year){
+  if (!dateStr) return null;
+  const m = dateStr.toLowerCase().match(/(\d{1,2})\s+([a-záéíóú]+)/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const monthKey = m[2].slice(0,3);
+  const month = MONTHS[monthKey];
+  if (month === undefined) return null;
+  return new Date(year || (state.trip?.tripYear || 2026), month, day);
+}
+
+function todayDateOnly(){
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function getTripDates(){
+  if (!state.days.length) return null;
+  const year = state.trip.tripYear || 2026;
+  const first = parseDate(state.days[0].date, year);
+  const last = parseDate(state.days[state.days.length-1].date, year);
+  return first && last ? {first, last, year} : null;
+}
+
+function getTodayDayId(){
+  const today = todayDateOnly();
+  const year = state.trip.tripYear || 2026;
+  for (const d of state.days){
+    const dt = parseDate(d.date, year);
+    if (dt && dt.getTime() === today.getTime()) return d.id;
+  }
+  return null;
+}
+
+function buildCountdownHTML(){
+  const td = getTripDates();
+  if (!td) return '';
+  const today = todayDateOnly();
+  const diffStart = Math.round((td.first - today) / 86400000);
+  const diffEnd = Math.round((td.last - today) / 86400000);
+
+  if (diffStart > 0){
+    return `<div class="countdown">
+      <div class="countdown-icon">⏳</div>
+      <div class="countdown-text">
+        <div class="countdown-num">Faltan ${diffStart} día${diffStart===1?'':'s'}</div>
+        <div class="countdown-label">para empezar el viaje</div>
+      </div>
+    </div>`;
+  }
+  if (diffStart <= 0 && diffEnd >= 0){
+    const todayId = getTodayDayId();
+    const todayDay = state.days.find(d => d.id === todayId);
+    if (todayDay){
+      const dayNum = state.days.findIndex(d => d.id === todayId) + 1;
+      return `<div class="countdown" style="background:rgba(250,204,21,0.2);border-color:rgba(250,204,21,0.4);">
+        <div class="countdown-icon">📍</div>
+        <div class="countdown-text">
+          <div class="countdown-num">Día ${dayNum} — ${escapeHtml(todayDay.place)}</div>
+          <div class="countdown-label">¡estás en el viaje!</div>
+        </div>
+      </div>`;
+    }
+    return `<div class="countdown" style="background:rgba(34,197,94,0.2);">
+      <div class="countdown-icon">✈️</div>
+      <div class="countdown-text">
+        <div class="countdown-num">¡Estás de viaje!</div>
+        <div class="countdown-label">${diffEnd} día${diffEnd===1?'':'s'} restante${diffEnd===1?'':'s'}</div>
+      </div>
+    </div>`;
+  }
+  // Trip ended
+  const daysAgo = Math.abs(diffEnd);
+  return `<div class="countdown" style="background:rgba(255,255,255,0.08);">
+    <div class="countdown-icon">🏠</div>
+    <div class="countdown-text">
+      <div class="countdown-num">El viaje terminó</div>
+      <div class="countdown-label">hace ${daysAgo} día${daysAgo===1?'':'s'}</div>
+    </div>
+  </div>`;
+}
 
 const DEFAULT_PENDING = [
   {id:"p1",done:false,text:"Comprar ferry São Vicente → Santo Antão",detail:"30€ ida y vuelta",url:"https://www.cvinterilhas.cv/buy",urgency:"alta"},
@@ -318,6 +493,7 @@ async function saveStateToCloud(){
       body: JSON.stringify(state)
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
+    lastCloudHash = hashState(state);
     showSyncStatus('☁️ Guardado', '#15803D');
   } catch (e) {
     console.error('Error guardando:', e);
@@ -398,6 +574,9 @@ function render(){
   islands.forEach(i => fhtml += `<button class="filter-btn ${state.filter===i?'active':''}" data-filter="${escapeHtml(i)}">${escapeHtml(i)}</button>`);
   document.getElementById('filters').innerHTML = fhtml;
 
+  // Countdown banner
+  document.getElementById('countdown-banner').innerHTML = buildCountdownHTML();
+
   // Triple capa de seguridad: onclick directo en cada botón después de renderizar
   document.querySelectorAll('#filters .filter-btn').forEach(btn => {
     btn.onclick = function(){ setFilter(btn.dataset.filter); };
@@ -466,17 +645,24 @@ function renderDays(){
     return d.island.split(',').map(s => s.trim()).includes(f);
   });
   let html = '';
-  filtered.forEach(day => {
+  const todayId = getTodayDayId();
+  filtered.forEach((day, viewIdx) => {
     const isOpen = !!state.open[day.id];
+    const isToday = day.id === todayId;
     const hasPending = day.items.some(i => i.tag === 'Pendiente');
+    const fullIdx = state.days.findIndex(d => d.id === day.id);
+    const w = getWeather(day);
+    const wHtml = w ? `<span class="weather-chip">${WMO_EMOJI[w.code]||'☁️'} ${w.max}°/${w.min}°${w.rain>=30?` <span class="w-rain">💧${w.rain}%</span>`:''}</span>` : '';
     html += `
-    <div class="card ${isOpen?'open':''}" id="card-${day.id}">
+    <div class="card ${isOpen?'open':''} ${isToday?'is-today':''}" id="card-${day.id}" data-day-id="${day.id}">
       <button class="card-header" style="border-left:4px solid ${day.color};" onclick="toggleOpen('${day.id}')">
         <div class="card-emoji" style="background:${day.color}22;">${day.emoji||'📍'}</div>
         <div class="card-meta">
           <div class="card-day" style="color:${day.color};">
             <span>${escapeHtml(day.date)}</span>
+            ${isToday?'<span class="today-badge">📍 HOY</span>':''}
             ${hasPending?'<span class="pending-badge">⚠️ PEND.</span>':''}
+            ${wHtml}
           </div>
           <div class="card-title">${escapeHtml(day.place)}</div>
           <div class="card-island">${escapeHtml(day.island||'')}</div>
@@ -485,11 +671,12 @@ function renderDays(){
       </button>
       <div class="card-body">`;
 
+    html += `<div class="items-wrap" data-day-id="${day.id}">`;
     day.items.forEach((item, i) => {
       const noteId = `note-${day.id}-${i}`;
       const hasNote = item.note && item.note.trim().length > 0;
       html += `
-      <div class="item">
+      <div class="item" data-item-idx="${i}">
         <span class="item-icon">${item.icon||'•'}</span>
         <div class="item-content">
           <div class="item-text">${escapeHtml(item.text)}</div>
@@ -501,10 +688,12 @@ function renderDays(){
           ${hasNote?`<div class="item-note" id="${noteId}">${escapeHtml(item.note)}</div>`:''}
         </div>
         <div class="item-actions">
+          ${isEditMode()?'<button class="drag-handle" title="Arrastra para mover">≡</button>':''}
           <button class="icon-btn" onclick="editItem('${day.id}',${i})">✏️</button>
         </div>
       </div>`;
     });
+    html += `</div>`;
 
     html += `<button class="add-item-btn" onclick="newItem('${day.id}')">＋ Añadir actividad</button>`;
 
@@ -519,16 +708,53 @@ function renderDays(){
       html += `<button class="add-item-btn" style="background:#FFF7ED;border-color:#FED7AA;color:#C2410C;margin-top:10px;" onclick="editHotel('${day.id}')">＋ Añadir alojamiento</button>`;
     }
 
+    const isFirst = fullIdx === 0;
+    const isLast = fullIdx === state.days.length - 1;
     html += `
         <div class="day-actions">
-          <button class="day-action-btn" onclick="editDay('${day.id}')">✏️ Editar día</button>
+          ${isEditMode()?`
+          <button class="day-action-btn reorder" onclick="moveDay('${day.id}',-1)" ${isFirst?'disabled':''} title="Subir">↑</button>
+          <button class="day-action-btn reorder" onclick="moveDay('${day.id}',1)" ${isLast?'disabled':''} title="Bajar">↓</button>`:''}
+          <button class="day-action-btn" onclick="editDay('${day.id}')">✏️ Editar</button>
           <button class="day-action-btn" onclick="duplicateDay('${day.id}')">📋 Duplicar</button>
-          <button class="day-action-btn danger" onclick="deleteDay('${day.id}')">🗑 Borrar</button>
+          <button class="day-action-btn danger" onclick="deleteDay('${day.id}')">🗑</button>
         </div>
       </div>
     </div>`;
   });
   document.getElementById('days-container').innerHTML = html;
+
+  // Inicializa Sortable solo en modo edición
+  if (isEditMode() && typeof Sortable !== 'undefined'){
+    document.querySelectorAll('#days-container .items-wrap').forEach(container => {
+      const dayId = container.dataset.dayId;
+      Sortable.create(container, {
+        handle: '.drag-handle',
+        animation: 200,
+        onEnd: function(evt){
+          if (evt.oldIndex === evt.newIndex) return;
+          const day = state.days.find(d => d.id === dayId);
+          if (!day) return;
+          const item = day.items.splice(evt.oldIndex, 1)[0];
+          day.items.splice(evt.newIndex, 0, item);
+          saveState();
+          renderDays();
+        }
+      });
+    });
+  }
+}
+
+function moveDay(id, dir){
+  if (!isEditMode() && !requestEditMode()) return;
+  const idx = state.days.findIndex(d => d.id === id);
+  if (idx === -1) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= state.days.length) return;
+  const [d] = state.days.splice(idx, 1);
+  state.days.splice(newIdx, 0, d);
+  saveState();
+  renderDays();
 }
 
 // ───────── ACTIONS ─────────
@@ -627,6 +853,9 @@ function buildDayForm(d){
       <div class="icon-grid" id="grid-emoji"></div></div>
     <div class="field"><label class="field-label">Color</label>
       <div class="color-grid" id="grid-color"></div></div>
+    <div class="field"><label class="field-label">📍 Coordenadas para el mapa (lat, lng)</label>
+      <input class="field-input" id="f-coords" value="${d.coords?escapeHtml(d.coords.lat+', '+d.coords.lng):''}" placeholder="ej: 14.9177, -23.5092">
+      <div style="font-size:10px;color:#94A3B8;margin-top:4px;">💡 Pega las coordenadas de Google Maps (mantén pulsado un punto y copia los números)</div></div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn-primary" onclick="saveDay()">Guardar</button>
@@ -641,7 +870,18 @@ function saveDay(){
   d.island = document.getElementById('f-island').value;
   d.emoji = document.querySelector('#grid-emoji .selected')?.dataset.icon || d.emoji;
   d.color = document.querySelector('#grid-color .selected')?.dataset.color || d.color;
+  // Coordenadas
+  const coordsStr = document.getElementById('f-coords').value.trim();
+  if (coordsStr){
+    const m = coordsStr.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
+    if (m){
+      d.coords = {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
+    }
+  } else {
+    delete d.coords;
+  }
   saveState(); render(); closeModal();
+  if (currentView === 'map') refreshMap();
 }
 function deleteDay(id){
   if (!isEditMode() && !requestEditMode()) return;
@@ -896,10 +1136,244 @@ async function reloadFromCloud(){
   closeModal();
   state = await loadStateFromCloud();
   if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
+  if (state.days) state.days.forEach(d => { if (!d.coords && DEFAULT_COORDS[d.id]) d.coords = {...DEFAULT_COORDS[d.id]}; });
   if (!state.trip) state.trip = {...DEFAULT_TRIP};
+  if (!state.trip.tripYear) state.trip.tripYear = 2026;
   if (!state.filter) state.filter = 'all';
   if (!state.open) state.open = {};
   render();
+  if (currentView === 'map') refreshMap();
+}
+
+// ═══════════ WEATHER (Open-Meteo, sin API key) ═══════════
+const WMO_EMOJI = {
+  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
+  45:'🌫️', 48:'🌫️',
+  51:'🌦️', 53:'🌦️', 55:'🌦️',
+  56:'🌧️', 57:'🌧️',
+  61:'🌧️', 63:'🌧️', 65:'🌧️',
+  66:'🌧️', 67:'🌧️',
+  71:'🌨️', 73:'🌨️', 75:'🌨️', 77:'🌨️',
+  80:'🌦️', 81:'🌧️', 82:'⛈️',
+  85:'🌨️', 86:'🌨️',
+  95:'⛈️', 96:'⛈️', 99:'⛈️'
+};
+const WEATHER_CACHE_KEY = 'caboVerde2026_weather';
+let weatherCache = {};
+try{ weatherCache = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY)) || {}; }catch(e){}
+
+function weatherKey(coords){
+  return `${coords.lat.toFixed(2)}_${coords.lng.toFixed(2)}`;
+}
+
+async function fetchAllWeather(){
+  if (!navigator.onLine) return;
+  const groups = {};
+  state.days.forEach(d => {
+    if (!d.coords) return;
+    const k = weatherKey(d.coords);
+    if (!groups[k]) groups[k] = {lat:d.coords.lat, lng:d.coords.lng};
+  });
+
+  let updated = false;
+  for (const k of Object.keys(groups)){
+    const cached = weatherCache[k];
+    // Cache válido durante 3h
+    if (cached && (Date.now() - cached.t < 3*3600*1000)) continue;
+    const g = groups[k];
+    try{
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${g.lat}&longitude=${g.lng}&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&timezone=auto&forecast_days=16`;
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      weatherCache[k] = {t: Date.now(), daily: data.daily};
+      updated = true;
+    } catch(e){}
+  }
+  if (updated){
+    try{ localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(weatherCache)); }catch(e){}
+    // Re-render solo si estamos en lista para mostrar el tiempo
+    if (currentView === 'list') renderDays();
+  }
+}
+
+function getWeather(day){
+  if (!day.coords) return null;
+  const cache = weatherCache[weatherKey(day.coords)];
+  if (!cache || !cache.daily) return null;
+  const year = state.trip.tripYear || 2026;
+  const dt = parseDate(day.date, year);
+  if (!dt) return null;
+  const iso = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+  const idx = cache.daily.time.indexOf(iso);
+  if (idx === -1) return null;
+  return {
+    code: cache.daily.weather_code[idx],
+    max: Math.round(cache.daily.temperature_2m_max[idx]),
+    min: Math.round(cache.daily.temperature_2m_min[idx]),
+    rain: cache.daily.precipitation_probability_max[idx]
+  };
+}
+
+// ═══════════ MAP VIEW ═══════════
+let mapInstance = null;
+let mapMarkers = [];
+let currentView = 'list';
+
+function switchView(v){
+  currentView = v;
+  document.getElementById('list-view').style.display = v === 'list' ? '' : 'none';
+  document.getElementById('map-view').classList.toggle('active', v === 'map');
+  document.getElementById('btn-list').classList.toggle('active', v === 'list');
+  document.getElementById('btn-map').classList.toggle('active', v === 'map');
+  if (v === 'map') {
+    // Esperar a que el contenedor sea visible antes de inicializar
+    setTimeout(initMap, 50);
+  }
+}
+
+function initMap(){
+  if (mapInstance) {
+    mapInstance.invalidateSize();
+    refreshMap();
+    return;
+  }
+  if (typeof L === 'undefined') {
+    document.getElementById('map-container').innerHTML = '<div style="padding:30px;text-align:center;color:#94A3B8;">No se pudo cargar el mapa.<br>Verifica tu conexión.</div>';
+    return;
+  }
+  mapInstance = L.map('map-container', {zoomControl:true, attributionControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 18,
+  }).addTo(mapInstance);
+  refreshMap();
+}
+
+function refreshMap(){
+  if (!mapInstance) return;
+  // Limpiar marcadores anteriores
+  mapMarkers.forEach(m => mapInstance.removeLayer(m));
+  mapMarkers = [];
+
+  const f = state.filter;
+  const days = f === 'all' ? state.days : state.days.filter(d => d.island && d.island.split(',').map(s=>s.trim()).includes(f));
+  const todayId = getTodayDayId();
+  const bounds = [];
+
+  days.forEach((day, idx) => {
+    if (!day.coords || !day.coords.lat) return;
+    const isToday = day.id === todayId;
+    const dayNum = state.days.findIndex(d => d.id === day.id) + 1;
+
+    const icon = L.divIcon({
+      className: 'day-marker' + (isToday?' today':''),
+      html: `<div class="day-marker-pin" style="background:${day.color};"><span>${day.emoji||'📍'}</span></div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -28]
+    });
+
+    const marker = L.marker([day.coords.lat, day.coords.lng], {icon}).addTo(mapInstance);
+    const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${day.coords.lat},${day.coords.lng}`;
+    marker.bindPopup(`
+      <div class="map-popup-title">${day.emoji||'📍'} Día ${dayNum} · ${escapeHtml(day.place)}</div>
+      <div class="map-popup-date">${escapeHtml(day.date)} · ${escapeHtml(day.island||'')}</div>
+      <div style="font-size:11px;color:#64748B;margin-top:4px;">${day.items.length} actividad${day.items.length===1?'':'es'}${day.hotel?' · 🏨 '+escapeHtml(day.hotel):''}</div>
+      <a href="${gmapsUrl}" target="_blank" class="map-popup-btn">🧭 Abrir en Maps</a>
+      <button onclick="goToDay('${day.id}')" style="background:#F1F5F9;color:#475569;border:none;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:700;margin-top:4px;margin-left:4px;cursor:pointer;font-family:inherit;">📋 Ver detalle</button>
+    `);
+    mapMarkers.push(marker);
+    bounds.push([day.coords.lat, day.coords.lng]);
+  });
+
+  if (bounds.length > 0){
+    mapInstance.fitBounds(bounds, {padding:[40,40], maxZoom:11});
+    // Si hay día actual, abre su popup
+    if (todayId){
+      const idx = days.findIndex(d => d.id === todayId);
+      if (idx >= 0 && mapMarkers[idx]) {
+        setTimeout(() => mapMarkers[idx].openPopup(), 400);
+      }
+    }
+  }
+}
+
+function goToDay(dayId){
+  switchView('list');
+  state.open[dayId] = true;
+  saveState();
+  render();
+  setTimeout(() => {
+    const card = document.getElementById('card-' + dayId);
+    if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 200);
+}
+
+// ═══════════ AUTO-SYNC ═══════════
+let autoSyncTimer = null;
+let lastCloudHash = '';
+
+function hashState(s){
+  // Hash simple del contenido relevante (trip + days + pending)
+  return JSON.stringify({trip:s.trip, days:s.days, pending:s.pending});
+}
+
+async function startAutoSync(){
+  lastCloudHash = hashState(state);
+  if (autoSyncTimer) clearInterval(autoSyncTimer);
+  autoSyncTimer = setInterval(checkCloudUpdates, 30000);
+}
+
+async function checkCloudUpdates(){
+  // Pausar si hay un modal abierto o si se está editando
+  if (document.getElementById('modal').classList.contains('show')) return;
+  if (!navigator.onLine) return;
+  if (!BIN_ID || BIN_ID === 'PEGA_AQUI_TU_BIN_ID') return;
+
+  try {
+    const res = await fetch(BIN_URL + '/latest', {
+      headers: { 'X-Master-Key': MASTER_KEY }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const cloud = data.record;
+    if (!cloud || !cloud.days) return;
+    const cloudHash = hashState(cloud);
+    if (cloudHash !== lastCloudHash && cloudHash !== hashState(state)){
+      // Hay cambios remotos
+      showSyncStatus('☁️ Cambios detectados — actualizando', '#0369A1');
+      // Preserva preferencias locales (open, filter, edit mode)
+      const localOpen = state.open;
+      const localFilter = state.filter;
+      state = cloud;
+      if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
+      if (state.days) state.days.forEach(d => { if (!d.coords && DEFAULT_COORDS[d.id]) d.coords = {...DEFAULT_COORDS[d.id]}; });
+      state.open = localOpen;
+      state.filter = localFilter;
+      lastCloudHash = cloudHash;
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      render();
+      if (currentView === 'map') refreshMap();
+    }
+  } catch (e) {}
+}
+
+// ═══════════ CONNECTION MONITOR ═══════════
+function setupConnectionMonitor(){
+  const updateState = () => {
+    const offline = !navigator.onLine;
+    document.getElementById('offline-bar').classList.toggle('show', offline);
+    document.body.classList.toggle('is-offline', offline);
+    if (!offline){
+      // Vuelve la conexión: forzar guardado pendiente y revisar cambios remotos
+      if (saveTimer) saveStateToCloud();
+      checkCloudUpdates();
+    }
+  };
+  window.addEventListener('online', updateState);
+  window.addEventListener('offline', updateState);
+  updateState();
 }
 
 function resetAll(){
@@ -917,10 +1391,26 @@ function resetAll(){
   state = await loadStateFromCloud();
   // Migración: asegura que cada item tenga campo note
   if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
+  // Migración: añade coords por defecto a días que no las tienen
+  if (state.days) state.days.forEach(d => { if (!d.coords && DEFAULT_COORDS[d.id]) d.coords = {...DEFAULT_COORDS[d.id]}; });
   if (!state.trip) state.trip = {...DEFAULT_TRIP};
+  if (!state.trip.tripYear) state.trip.tripYear = 2026;
   if (!state.filter) state.filter = 'all';
   if (!state.open) state.open = {};
+  // Auto-abrir el día actual si lo hay
+  const todayId = getTodayDayId();
+  if (todayId && state.open[todayId] === undefined) state.open[todayId] = true;
   render();
+  // Sincronización automática cada 30s
+  startAutoSync();
+  // Detección de online/offline
+  setupConnectionMonitor();
+  // Service Worker para modo offline
+  if ('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  // Tiempo (Open-Meteo, sin API key)
+  fetchAllWeather();
 })();
 </script>
 </body>

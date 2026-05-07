@@ -421,13 +421,21 @@ function buildCountdownHTML(){
   if (diffStart <= 0 && diffEnd >= 0){
     const todayId = getTodayDayId();
     const todayDay = state.days.find(d => d.id === todayId);
+    const totalDays = state.days.length;
+
+    // Subtítulo con días restantes
+    let subtitle;
+    if (diffEnd === 0) subtitle = '🌅 último día del viaje';
+    else if (diffEnd === 1) subtitle = '⏰ mañana es el último día';
+    else subtitle = `Quedan ${diffEnd} día${diffEnd===1?'':'s'} de viaje`;
+
     if (todayDay){
       const dayNum = state.days.findIndex(d => d.id === todayId) + 1;
       return `<div class="countdown" style="background:rgba(250,204,21,0.2);border-color:rgba(250,204,21,0.4);">
         <div class="countdown-icon">📍</div>
         <div class="countdown-text">
-          <div class="countdown-num">Día ${dayNum} — ${escapeHtml(todayDay.place)}</div>
-          <div class="countdown-label">¡estás en el viaje!</div>
+          <div class="countdown-num">Día ${dayNum}/${totalDays} — ${escapeHtml(todayDay.place)}</div>
+          <div class="countdown-label">${subtitle}</div>
         </div>
       </div>`;
     }
@@ -435,7 +443,7 @@ function buildCountdownHTML(){
       <div class="countdown-icon">✈️</div>
       <div class="countdown-text">
         <div class="countdown-num">¡Estás de viaje!</div>
-        <div class="countdown-label">${diffEnd} día${diffEnd===1?'':'s'} restante${diffEnd===1?'':'s'}</div>
+        <div class="countdown-label">${subtitle}</div>
       </div>
     </div>`;
   }
@@ -1060,7 +1068,10 @@ function buildItemForm(item, isNew){
     <div class="field"><label class="field-label">Descripción</label>
       <textarea class="field-textarea" id="f-text" placeholder="ej: Cena en el restaurante...">${escapeHtml(item.text)}</textarea></div>
     <div class="field"><label class="field-label">🕐 Hora (opcional)</label>
-      <input type="time" class="field-input" id="f-time" value="${escapeHtml(item.time||'')}"></div>
+      <div style="display:flex;gap:6px;align-items:stretch;">
+        <input type="time" class="field-input" id="f-time" value="${escapeHtml(item.time||'')}" style="flex:1;">
+        <button type="button" onclick="document.getElementById('f-time').value='';" style="background:#F1F5F9;border:none;border-radius:10px;padding:0 14px;font-size:12px;cursor:pointer;color:#64748B;font-family:inherit;font-weight:600;white-space:nowrap;">✕ Quitar</button>
+      </div></div>
     <div class="field"><label class="field-label">Icono</label>
       <div class="icon-grid" id="grid-icon"></div></div>
     <div class="field"><label class="field-label">Etiqueta</label>

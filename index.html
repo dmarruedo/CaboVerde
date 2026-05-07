@@ -206,6 +206,18 @@
   /* DAY REORDER BUTTONS */
   .day-action-btn.reorder{flex:0 0 auto;width:38px;padding:7px 0;}
   .day-action-btn:disabled{opacity:0.35;cursor:not-allowed;}
+
+  /* TIME BADGE */
+  .time-badge{display:inline-block;background:#0B2545;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-right:6px;letter-spacing:.04em;font-variant-numeric:tabular-nums;}
+
+  /* MAP LINK CHIP */
+  .map-link-chip{font-size:9px;color:#16A34A;background:#F0FDF4;padding:2px 7px;border-radius:8px;cursor:pointer;border:none;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+  .map-link-chip:active{background:#DCFCE7;}
+
+  /* ITEM MARKERS (smaller, circular) */
+  .item-marker{background:transparent;border:none;}
+  .item-marker-pin{width:26px;height:26px;border-radius:50%;background:#0B2545;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+  .item-marker-pin span{font-size:12px;}
 </style>
 </head>
 <body>
@@ -273,6 +285,86 @@ const DEFAULT_COORDS = {
   d12: {lat:14.9177, lng:-23.5092, label:'Praia'},
   d13: {lat:14.9177, lng:-23.5092, label:'Praia (aeropuerto)'},
 };
+
+// Coordenadas conocidas de actividades (auto-asignadas por keyword del texto)
+const ACTIVITY_COORDS_KEYWORDS = [
+  // PRAIA - Plateau y centro
+  {match:/plateau|palacio presidencial|cuartel jaime|diogo gomes/i, lat:14.9166, lng:-23.5096},
+  {match:/quintal da m[uú]sica/i, lat:14.9171, lng:-23.5095},
+  {match:/iglesia.+(gra[çc]a|nossa senhora)|nossa senhora/i, lat:14.9170, lng:-23.5104},
+  {match:/miradouro|amilcar cabral/i, lat:14.9183, lng:-23.5118},
+  {match:/mercado municipal de praia|av(\.|enida) comercial 5|albuquerque/i, lat:14.9176, lng:-23.5095},
+  {match:/quebra canela|gamboa/i, lat:14.9072, lng:-23.5197},
+  {match:/faro do[ñn]a mar[ií]a p[ií]a/i, lat:14.8970, lng:-23.5170},
+  {match:/casa sodadi/i, lat:14.9181, lng:-23.5096},
+  // CIDADE VELHA
+  {match:/cidade velha|pelourinho|rua da banana|convento.+francisco|catedral.+rib/i, lat:14.9156, lng:-23.6022},
+  // TARRAFAL
+  {match:/playa.+tarrafal|tarrafal.+playa/i, lat:15.2738, lng:-23.7472},
+  {match:/faro ponta pedra|monte graciosa|piscinas naturales/i, lat:15.2911, lng:-23.7536},
+  {match:/bangal[oó] buzio/i, lat:15.2750, lng:-23.7461},
+  // SERRA MALAGUETA
+  {match:/serra malagueta|centro de interpretaci/i, lat:15.1797, lng:-23.6244},
+  // SANTA CRUZ AREA
+  {match:/vale das mil palmeiras|santa cruz/i, lat:15.1339, lng:-23.5701},
+  {match:/pedra badejo/i, lat:15.1233, lng:-23.5331},
+  {match:/calheta de s[ãa]o miguel/i, lat:15.0466, lng:-23.5269},
+  // PICOS / SAO JORGE
+  {match:/s[ãa]o jorge village/i, lat:15.0850, lng:-23.6190},
+  {match:/picos de santiago/i, lat:15.0850, lng:-23.6230},
+  // SAO FRANCISCO/TOME
+  {match:/s[ãa]o francisco|s[ãa]o tom[eé]/i, lat:14.9648, lng:-23.4612},
+  // ASSOMADA
+  {match:/assomada/i, lat:15.1014, lng:-23.6685},
+  // MINDELO
+  {match:/laginha/i, lat:16.8898, lng:-24.9962},
+  {match:/av(\.|enida) marginal|torre de bel[eé]m|mercado municipal de mindelo|plaza estrella|mercado de pescado/i, lat:16.8901, lng:-24.9889},
+  {match:/guest house lina elisa/i, lat:16.8881, lng:-24.9956},
+  // FERRY
+  {match:/porto novo|n[oô]s ferry|ferry.+(mindelo|porto)/i, lat:17.0185, lng:-25.0635},
+  // SANTO ANTAO
+  {match:/carretera de la corda|de la corda|delgadinho/i, lat:17.1108, lng:-25.0540},
+  {match:/ribeira grande/i, lat:17.1840, lng:-25.0710},
+  {match:/pousada green place/i, lat:17.1840, lng:-25.0710},
+  {match:/casa santa b[aá]rbara/i, lat:17.1840, lng:-25.0710},
+  {match:/casa cavoquinho/i, lat:17.0794, lng:-25.1483},
+  // PONTA DO SOL / FONTAINHAS / CRUZINHA
+  {match:/ponta do sol/i, lat:17.2030, lng:-25.0890},
+  {match:/fontainhas/i, lat:17.1932, lng:-25.0769},
+  {match:/cruzinha/i, lat:17.1683, lng:-25.0383},
+  // VALLE DE PAUL
+  {match:/\bcova\b|cr[aá]ter volc[aá]nico/i, lat:17.0794, lng:-25.1483},
+  {match:/vila das pombas|\bpombas\b|pueblo pesquero/i, lat:17.0535, lng:-25.0265},
+  {match:/lombo comprido/i, lat:17.0716, lng:-25.0700},
+  {match:/valle de paul|vale do paul/i, lat:17.0716, lng:-25.0700},
+  // SAO PEDRO
+  {match:/s[ãa]o pedro/i, lat:16.8225, lng:-25.0708},
+  {match:/faro do[ñn]a am[eé]lia/i, lat:16.8051, lng:-25.0935},
+  {match:/aquiles eco hotel/i, lat:16.8225, lng:-25.0708},
+  // PRAIA AIRPORT
+  {match:/my flat 2|aeropuerto.+praia/i, lat:14.9476, lng:-23.4847},
+];
+
+function autoAssignCoords(text){
+  for (const rule of ACTIVITY_COORDS_KEYWORDS){
+    if (rule.match.test(text)) return {lat:rule.lat, lng:rule.lng};
+  }
+  return null;
+}
+
+function migrateActivityCoords(){
+  if (state.actvCoordsV1) return false;
+  let count = 0;
+  state.days.forEach(d => {
+    d.items.forEach(item => {
+      if (item.coords) return;
+      const c = autoAssignCoords(item.text);
+      if (c){ item.coords = c; count++; }
+    });
+  });
+  state.actvCoordsV1 = true;
+  return count > 0;
+}
 
 // Parser de fechas tipo "Mié 12 Ago" → Date object
 const MONTHS = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};
@@ -675,14 +767,16 @@ function renderDays(){
     day.items.forEach((item, i) => {
       const noteId = `note-${day.id}-${i}`;
       const hasNote = item.note && item.note.trim().length > 0;
+      const timeHtml = item.time ? `<span class="time-badge">🕐 ${escapeHtml(item.time)}</span>` : '';
       html += `
       <div class="item" data-item-idx="${i}">
         <span class="item-icon">${item.icon||'•'}</span>
         <div class="item-content">
-          <div class="item-text">${escapeHtml(item.text)}</div>
+          <div class="item-text">${timeHtml}${escapeHtml(item.text)}</div>
           <div class="item-tags">
             <span class="tag tag-${item.tag||'Otro'}">${escapeHtml(item.tag||'Otro')}</span>
             ${item.url?`<a class="tag-link-small" href="${escapeHtml(item.url)}" target="_blank">🔗 enlace</a>`:''}
+            ${item.coords?`<button class="map-link-chip" onclick="goToItemOnMap('${day.id}',${i})">📍 mapa</button>`:''}
             ${hasNote?`<button class="note-toggle" onclick="toggleNote('${noteId}')">📝 nota</button>`:''}
           </div>
           ${hasNote?`<div class="item-note" id="${noteId}">${escapeHtml(item.note)}</div>`:''}
@@ -962,13 +1056,18 @@ function buildItemForm(item, isNew){
   return `
     <div class="modal-handle"></div>
     <div class="modal-title">${isNew?'Nueva actividad':'Editar actividad'}</div>
-    <div class="modal-subtitle">Añade detalles, etiqueta, enlaces y notas</div>
+    <div class="modal-subtitle">Añade detalles, etiqueta, hora, ubicación, enlaces y notas</div>
     <div class="field"><label class="field-label">Descripción</label>
       <textarea class="field-textarea" id="f-text" placeholder="ej: Cena en el restaurante...">${escapeHtml(item.text)}</textarea></div>
+    <div class="field"><label class="field-label">🕐 Hora (opcional)</label>
+      <input type="time" class="field-input" id="f-time" value="${escapeHtml(item.time||'')}"></div>
     <div class="field"><label class="field-label">Icono</label>
       <div class="icon-grid" id="grid-icon"></div></div>
     <div class="field"><label class="field-label">Etiqueta</label>
       <div class="tag-grid" id="grid-tag"></div></div>
+    <div class="field"><label class="field-label">📍 Ubicación en el mapa (opcional)</label>
+      <input class="field-input" id="f-item-coords" value="${item.coords?escapeHtml(item.coords.lat+', '+item.coords.lng):''}" placeholder="ej: 14.9177, -23.5092">
+      <div style="font-size:10px;color:#94A3B8;margin-top:4px;">💡 Pega de Google Maps. Si dejas vacío y la descripción coincide con un sitio conocido, se rellenará solo.</div></div>
     <div class="field"><label class="field-label">URL (opcional)</label>
       <input class="field-input" id="f-url" value="${escapeHtml(item.url||'')}" placeholder="https://..."></div>
     <div class="field"><label class="field-label">📝 Nota (oculta hasta que se pulsa)</label>
@@ -983,16 +1082,33 @@ function buildItemForm(item, isNew){
 function saveItem(){
   const d = state.days.find(x=>x.id===editingCtx.dayId);
   if (!d) return;
+  const text = document.getElementById('f-text').value;
   const data = {
     icon: document.querySelector('#grid-icon .selected')?.dataset.icon || '📍',
-    text: document.getElementById('f-text').value,
+    text: text,
     tag: document.querySelector('#grid-tag .selected')?.dataset.tag || 'Otro',
     url: document.getElementById('f-url').value,
     note: document.getElementById('f-note').value,
+    time: document.getElementById('f-time').value,
   };
+  // Coordenadas: parse del input
+  const coordsStr = document.getElementById('f-item-coords').value.trim();
+  if (coordsStr){
+    const m = coordsStr.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
+    if (m){
+      data.coords = {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
+    }
+  } else if (editingCtx.isNew){
+    // En creación: si no se pusieron coords, intentar auto-asignar por keyword
+    const auto = autoAssignCoords(text);
+    if (auto) data.coords = auto;
+  }
+  // En edición sin coords explícitas, las quitamos (el usuario las borró deliberadamente)
+
   if (editingCtx.isNew) d.items.push(data);
   else d.items[editingCtx.idx] = data;
   saveState(); render(); closeModal();
+  if (currentView === 'map') refreshMap();
 }
 function deleteItem(){
   if (!confirm('¿Borrar esta actividad?')) return;
@@ -1137,12 +1253,14 @@ async function reloadFromCloud(){
   state = await loadStateFromCloud();
   if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
   if (state.days) state.days.forEach(d => { if (!d.coords && DEFAULT_COORDS[d.id]) d.coords = {...DEFAULT_COORDS[d.id]}; });
+  const migrated = migrateActivityCoords();
   if (!state.trip) state.trip = {...DEFAULT_TRIP};
   if (!state.trip.tripYear) state.trip.tripYear = 2026;
   if (!state.filter) state.filter = 'all';
   if (!state.open) state.open = {};
   render();
   if (currentView === 'map') refreshMap();
+  if (migrated) saveStateToCloud();
 }
 
 // ═══════════ WEATHER (Open-Meteo, sin API key) ═══════════
@@ -1262,41 +1380,74 @@ function refreshMap(){
   const bounds = [];
 
   days.forEach((day, idx) => {
-    if (!day.coords || !day.coords.lat) return;
-    const isToday = day.id === todayId;
     const dayNum = state.days.findIndex(d => d.id === day.id) + 1;
+    const isToday = day.id === todayId;
 
-    const icon = L.divIcon({
-      className: 'day-marker' + (isToday?' today':''),
-      html: `<div class="day-marker-pin" style="background:${day.color};"><span>${day.emoji||'📍'}</span></div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -28]
+    // PIN GRANDE del día
+    if (day.coords && day.coords.lat){
+      const icon = L.divIcon({
+        className: 'day-marker' + (isToday?' today':''),
+        html: `<div class="day-marker-pin" style="background:${day.color};"><span>${day.emoji||'📍'}</span></div>`,
+        iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
+      });
+      const marker = L.marker([day.coords.lat, day.coords.lng], {icon}).addTo(mapInstance);
+      const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${day.coords.lat},${day.coords.lng}`;
+      marker.bindPopup(`
+        <div class="map-popup-title">${day.emoji||'📍'} Día ${dayNum} · ${escapeHtml(day.place)}</div>
+        <div class="map-popup-date">${escapeHtml(day.date)} · ${escapeHtml(day.island||'')}</div>
+        <div style="font-size:11px;color:#64748B;margin-top:4px;">${day.items.length} actividad${day.items.length===1?'':'es'}${day.hotel?' · 🏨 '+escapeHtml(day.hotel):''}</div>
+        <a href="${gmapsUrl}" target="_blank" class="map-popup-btn">🧭 Abrir en Maps</a>
+        <button onclick="goToDay('${day.id}')" style="background:#F1F5F9;color:#475569;border:none;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:700;margin-top:4px;margin-left:4px;cursor:pointer;font-family:inherit;">📋 Ver detalle</button>
+      `);
+      marker._mapId = 'day-' + day.id;
+      mapMarkers.push(marker);
+      bounds.push([day.coords.lat, day.coords.lng]);
+    }
+
+    // PINES PEQUEÑOS de actividades con coordenadas
+    day.items.forEach((item, i) => {
+      if (!item.coords || !item.coords.lat) return;
+      const itemIcon = L.divIcon({
+        className: 'item-marker',
+        html: `<div class="item-marker-pin" style="background:${day.color};"><span>${item.icon||'📍'}</span></div>`,
+        iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -10]
+      });
+      const itemMarker = L.marker([item.coords.lat, item.coords.lng], {icon:itemIcon}).addTo(mapInstance);
+      const gmaps = `https://www.google.com/maps/search/?api=1&query=${item.coords.lat},${item.coords.lng}`;
+      const timeText = item.time ? `🕐 ${item.time} · ` : '';
+      itemMarker.bindPopup(`
+        <div class="map-popup-title">${item.icon||'📍'} ${escapeHtml(item.text)}</div>
+        <div class="map-popup-date">${timeText}Día ${dayNum} · ${escapeHtml(day.date)}</div>
+        <div style="font-size:10px;color:#94A3B8;margin-top:2px;text-transform:uppercase;letter-spacing:.04em;">${escapeHtml(item.tag||'')}</div>
+        <a href="${gmaps}" target="_blank" class="map-popup-btn">🧭 Abrir en Maps</a>
+      `);
+      itemMarker._mapId = 'item-' + day.id + '-' + i;
+      mapMarkers.push(itemMarker);
+      bounds.push([item.coords.lat, item.coords.lng]);
     });
-
-    const marker = L.marker([day.coords.lat, day.coords.lng], {icon}).addTo(mapInstance);
-    const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${day.coords.lat},${day.coords.lng}`;
-    marker.bindPopup(`
-      <div class="map-popup-title">${day.emoji||'📍'} Día ${dayNum} · ${escapeHtml(day.place)}</div>
-      <div class="map-popup-date">${escapeHtml(day.date)} · ${escapeHtml(day.island||'')}</div>
-      <div style="font-size:11px;color:#64748B;margin-top:4px;">${day.items.length} actividad${day.items.length===1?'':'es'}${day.hotel?' · 🏨 '+escapeHtml(day.hotel):''}</div>
-      <a href="${gmapsUrl}" target="_blank" class="map-popup-btn">🧭 Abrir en Maps</a>
-      <button onclick="goToDay('${day.id}')" style="background:#F1F5F9;color:#475569;border:none;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:700;margin-top:4px;margin-left:4px;cursor:pointer;font-family:inherit;">📋 Ver detalle</button>
-    `);
-    mapMarkers.push(marker);
-    bounds.push([day.coords.lat, day.coords.lng]);
   });
 
   if (bounds.length > 0){
     mapInstance.fitBounds(bounds, {padding:[40,40], maxZoom:11});
     // Si hay día actual, abre su popup
     if (todayId){
-      const idx = days.findIndex(d => d.id === todayId);
-      if (idx >= 0 && mapMarkers[idx]) {
-        setTimeout(() => mapMarkers[idx].openPopup(), 400);
-      }
+      const target = mapMarkers.find(m => m._mapId === 'day-' + todayId);
+      if (target) setTimeout(() => target.openPopup(), 400);
     }
   }
+}
+
+function goToItemOnMap(dayId, itemIdx){
+  const day = state.days.find(d => d.id === dayId);
+  if (!day || !day.items[itemIdx]?.coords) return;
+  switchView('map');
+  setTimeout(() => {
+    if (!mapInstance) return;
+    const c = day.items[itemIdx].coords;
+    mapInstance.setView([c.lat, c.lng], 15);
+    const target = mapMarkers.find(m => m._mapId === 'item-' + dayId + '-' + itemIdx);
+    if (target) target.openPopup();
+  }, 300);
 }
 
 function goToDay(dayId){
@@ -1393,6 +1544,8 @@ function resetAll(){
   if (state.days) state.days.forEach(d => d.items.forEach(i => { if (i.note === undefined) i.note = ''; }));
   // Migración: añade coords por defecto a días que no las tienen
   if (state.days) state.days.forEach(d => { if (!d.coords && DEFAULT_COORDS[d.id]) d.coords = {...DEFAULT_COORDS[d.id]}; });
+  // Migración: auto-asigna coordenadas a actividades famosas
+  const migratedCoords = migrateActivityCoords();
   if (!state.trip) state.trip = {...DEFAULT_TRIP};
   if (!state.trip.tripYear) state.trip.tripYear = 2026;
   if (!state.filter) state.filter = 'all';
@@ -1401,6 +1554,8 @@ function resetAll(){
   const todayId = getTodayDayId();
   if (todayId && state.open[todayId] === undefined) state.open[todayId] = true;
   render();
+  // Si la migración añadió cosas, súbelas al cloud
+  if (migratedCoords) saveStateToCloud();
   // Sincronización automática cada 30s
   startAutoSync();
   // Detección de online/offline
